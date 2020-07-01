@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:todo/Data/todo.dart';
+import 'package:todo/Database/db_controller.dart';
 
 class AddTodo extends StatefulWidget {
   @override
@@ -73,9 +74,15 @@ class _AddTodoState extends State<AddTodo> {
 
   void _saveTodo(context) {
     //do checks if a name is entered
-    //create Todo
-    print(_createTodo());
-    //save Todo into SQLite database
+    Todo toSave = _createTodo();
+    print(toSave);
+    DBController.instance.insertTodo(toSave);
+    //to pop todo adder from Navigator
+    Navigator.of(context).pop();
+
+    //update state of Todolist
+
+
   }
 
   Todo _createTodo() {

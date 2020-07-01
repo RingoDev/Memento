@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:todo/Database/db_controller.dart';
 import '../Data/todo.dart';
 import 'add_todo.dart';
 
@@ -9,13 +10,18 @@ class TodoList extends StatefulWidget {
 }
 
 class _TodoListState extends State<TodoList> {
-  final _todolist = <Todo>[];
+  List<Todo> _todolist = DBController.instance.queryTodos();
   final _biggerFont = TextStyle(fontSize: 18.0);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('TodoList'), actions: [
+        IconButton(
+          onPressed: () {
+          },
+          icon: Icon(Icons.refresh)
+        ),
         IconButton(
           onPressed: () {
             Navigator.of(context).push(

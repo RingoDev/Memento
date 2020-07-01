@@ -1,6 +1,8 @@
+import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 import 'dart:async';
 import 'package:path/path.dart';
+import 'package:todo/Data/todo.dart';
 
 class DBController {
   static final _databaseName = "todolist.db";
@@ -9,7 +11,8 @@ class DBController {
   static final columnId = '_id';
   static final columnName = 'name';
   static final columnDescription = 'description';
-  static final columnDateTime = 'dateTime';
+  static final columnDate = 'due_date';
+  static final columnTime = 'due_time';
 
   // make this a singleton class
   DBController._privateConstructor();
@@ -29,6 +32,7 @@ class DBController {
   // this opens the database (and creates it if it doesn't exist)
   _initDatabase() async {
     return await openDatabase(join(await getDatabasesPath(), _databaseName),
+        version: 1,
         onCreate: _onCreate);
   }
 
@@ -39,7 +43,8 @@ class DBController {
             $columnId INTEGER PRIMARY KEY,
             $columnName TEXT NOT NULL,
             $columnDescription TEXT,
-            $columnDateTime TEXT NOT NULL
+            $columnDate TEXT NOT NULL,
+            $columnTime TEXT NOT NULL
           )
           ''');
   }
@@ -84,4 +89,34 @@ class DBController {
     return await db.delete(table, where: '$columnId = ?', whereArgs: [id]);
   }
 
+  Future<int> insertTodo(Todo todo) async {
+    Map map = Map<String, dynamic>();
+    map.putIfAbsent(columnName, () => todo.name);
+    map.putIfAbsent(columnDescription, () => todo.description);
+    map.putIfAbsent(columnDate, () => todo.dueDate.toIso8601String());
+    map.putIfAbsent(columnTime, () => todo.dueTime.hour.toString() + ':' + todo.dueTime.minute.toString());
+    print(map);
+    return await insert(map);
+  }
+
+  List<Todo> queryTodos() {
+    List<Todo> list = List();
+    queryAllRows().then((value) {
+      for (Map map in value){
+        list.add(mapToTodo(map));
+      }
+    });
+    return list;
+  }
+
+  Todo mapToTodo(Map<String,dynamic> map){
+    Todo todo = Todo(map[columnName]);
+    todo.description = map[columnDescription];
+    String time = map[columnTime];
+    List<String> timelist = time.split(":");
+    todo.dueTime = TimeOfDay(hour: int.parse(timelist[0]), minute: int.parse(timelist[1]));
+    todo.dueDate = DateTime.parse(map[columnDate]);
+    print(todo);
+    return todo;
+  }
 }
