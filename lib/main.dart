@@ -9,7 +9,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'TODOs',
       home: TodoList(),
-      theme: ThemeData.dark(),
+      theme: ThemeData.light(),
     );
   }
 }

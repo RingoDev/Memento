@@ -18,13 +18,10 @@ class _TodoListState extends State<TodoList> {
       appBar: AppBar(title: Text('TodoList'), actions: [
         IconButton(
           onPressed: () {
-            return PageRouteBuilder(
-              pageBuilder: (context, animation, secondaryAnimation) =>
-                  AddTodo(),
-              transitionsBuilder:
-                  (context, animation, secondaryAnimation, child) {
-                return child;
-              },
+            Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                  builder: (context) => AddTodo()
+              ),
             );
           },
           icon: Icon(Icons.add),
