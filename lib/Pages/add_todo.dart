@@ -7,6 +7,7 @@ class AddTodo extends StatefulWidget {
 
 class _AddTodoState extends State<AddTodo> {
   DateTime selectedDate = DateTime.now();
+  TimeOfDay selectedTime = TimeOfDay.now();
 
   @override
   Widget build(BuildContext context) {
@@ -14,19 +15,76 @@ class _AddTodoState extends State<AddTodo> {
         appBar: AppBar(
           title: Text('Create a new TODO'),
         ),
-        body: Center(
-            child: ListView(padding: EdgeInsets.all(16.0), children: [
-          _createForm(),
-          Row(
-            children: _createDateRow(),
-          )
-        ])));
+        body: Container(
+          padding: EdgeInsets.all(16.0),
+          child: _createForm(),
+        ));
   }
 
   Widget _createForm() {
     return Form(
-      child: TextField(),
+      child: Column(
+        children: <Widget>[
+          Text('Enter a Name'),
+          TextField(maxLength: 60),
+          Text('Enter a Description'),
+          TextField(
+            keyboardType: TextInputType.multiline,
+            maxLines: null,
+          ),
+          SizedBox(height: 10),
+          Text('DueDate'),
+          Row(
+              children: _createDateRow(),
+              mainAxisAlignment: MainAxisAlignment.center),
+          Text('DueTime'),
+          Row(
+              children: _createTimeRow(),
+              mainAxisAlignment: MainAxisAlignment.center),
+          RaisedButton(
+            onPressed: () {
+              _saveTodo(context);
+            },
+            child: Text(
+                'Save TODO',
+                style: TextStyle(fontSize: 20)
+            ),
+          ),
+
+        ],
+
+      ),
     );
+  }
+
+  void _saveTodo(context){
+    //do checks if a name is entered
+    //save Todo into SQLite database
+
+  }
+
+  Future<Null> _selectTime(BuildContext context) async {
+    final TimeOfDay picked = await showTimePicker(
+      context: context,
+      initialTime: selectedTime,
+    );
+    if (picked != null && picked != selectedTime)
+      setState(() {
+        selectedTime = picked;
+      });
+  }
+
+  List<Widget> _createTimeRow() {
+    return <Widget>[
+      Text(selectedTime.hour.toString() + ':' + selectedTime.minute.toString(),
+          style: TextStyle(fontSize: 18.0)),
+      IconButton(
+        icon: Icon(Icons.alarm),
+        onPressed: () {
+          _selectTime(context);
+        },
+      )
+    ];
   }
 
   Future<Null> _selectDate(BuildContext context) async {
@@ -43,7 +101,13 @@ class _AddTodoState extends State<AddTodo> {
 
   List<Widget> _createDateRow() {
     return <Widget>[
-      Text(formatDate(selectedDate), style: TextStyle(fontSize: 18.0)),
+      Text(
+          selectedDate.day.toString() +
+              '.' +
+              selectedDate.month.toString() +
+              '.' +
+              selectedDate.year.toString(),
+          style: TextStyle(fontSize: 18.0)),
       IconButton(
         icon: Icon(Icons.calendar_today),
         onPressed: () {
@@ -52,12 +116,4 @@ class _AddTodoState extends State<AddTodo> {
       )
     ];
   }
-}
-
-String formatDate(DateTime datetime) {
-  return datetime.day.toString() +
-      '.' +
-      datetime.month.toString() +
-      '.' +
-      datetime.year.toString();
 }
