@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:sqflite/sqflite.dart';
+import 'package:todo/Data/todo.dart';
 
 class AddTodo extends StatefulWidget {
   @override
@@ -8,6 +10,8 @@ class AddTodo extends StatefulWidget {
 class _AddTodoState extends State<AddTodo> {
   DateTime selectedDate = DateTime.now();
   TimeOfDay selectedTime = TimeOfDay.now();
+  String selectedName = "";
+  String selectedDescription = "";
 
   @override
   Widget build(BuildContext context) {
@@ -26,11 +30,12 @@ class _AddTodoState extends State<AddTodo> {
       child: Column(
         children: <Widget>[
           Text('Enter a Name'),
-          TextField(maxLength: 60),
+          TextField(maxLength: 60, onChanged: _selectName),
           Text('Enter a Description'),
           TextField(
             keyboardType: TextInputType.multiline,
             maxLines: null,
+            onChanged: _selectDescription,
           ),
           SizedBox(height: 10),
           Text('DueDate'),
@@ -45,22 +50,40 @@ class _AddTodoState extends State<AddTodo> {
             onPressed: () {
               _saveTodo(context);
             },
-            child: Text(
-                'Save TODO',
-                style: TextStyle(fontSize: 20)
-            ),
+            child: Text('Save TODO', style: TextStyle(fontSize: 20)),
           ),
-
         ],
-
       ),
     );
   }
 
-  void _saveTodo(context){
-    //do checks if a name is entered
-    //save Todo into SQLite database
+  void _selectName(String str) {
+    if (str != null && str != selectedName)
+      setState(() {
+        selectedName = str;
+      });
+  }
 
+  void _selectDescription(String str) {
+    if (str != null && str != selectedDescription)
+      setState(() {
+        selectedDescription = str;
+      });
+  }
+
+  void _saveTodo(context) {
+    //do checks if a name is entered
+    //create Todo
+    print(_createTodo());
+    //save Todo into SQLite database
+  }
+
+  Todo _createTodo() {
+    Todo todo = Todo(selectedName);
+    todo.description = selectedDescription;
+    todo.dueDate = selectedDate;
+    todo.dueTime= selectedTime;
+    return todo;
   }
 
   Future<Null> _selectTime(BuildContext context) async {

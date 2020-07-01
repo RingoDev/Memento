@@ -1,9 +1,24 @@
+import 'package:flutter/material.dart';
+
 class Todo {
   String name;
-  DateTime made;
+  String description;
+  DateTime madeDate;
+  TimeOfDay madeTime;
   DateTime dueDate;
+  TimeOfDay dueTime;
 
-  Todo(String name) {
-    this.name = name;
+  Todo(this.name);
+
+  @override
+  String toString() {
+    return 'name: ' +
+        name +
+        '\ndescription: ' +
+        description +
+        '\nDueDate: ' +
+        dueDate.toIso8601String() +
+        '\nDueTime: ' +
+        dueTime.toString();
   }
 }
