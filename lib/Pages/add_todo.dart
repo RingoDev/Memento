@@ -4,8 +4,11 @@ import 'package:todo/Data/todo.dart';
 import 'package:todo/Database/db_controller.dart';
 
 class AddTodo extends StatefulWidget {
+  final VoidCallback onTodoAdded;
+  AddTodo({this.onTodoAdded});
+
   @override
-  _AddTodoState createState() => _AddTodoState();
+  _AddTodoState createState() => _AddTodoState(this.onTodoAdded);
 }
 
 class _AddTodoState extends State<AddTodo> {
@@ -13,6 +16,11 @@ class _AddTodoState extends State<AddTodo> {
   TimeOfDay selectedTime = TimeOfDay.now();
   String selectedName = "";
   String selectedDescription = "";
+
+  final VoidCallback onTodoAdded;
+  _AddTodoState(this.onTodoAdded);
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -50,6 +58,8 @@ class _AddTodoState extends State<AddTodo> {
           RaisedButton(
             onPressed: () {
               _saveTodo(context);
+              // callback to parent widget
+              onTodoAdded();
             },
             child: Text('Save TODO', style: TextStyle(fontSize: 20)),
           ),
@@ -81,15 +91,13 @@ class _AddTodoState extends State<AddTodo> {
     Navigator.of(context).pop();
 
     //update state of Todolist
-
-
   }
 
   Todo _createTodo() {
     Todo todo = Todo(selectedName);
     todo.description = selectedDescription;
     todo.dueDate = selectedDate;
-    todo.dueTime= selectedTime;
+    todo.dueTime = selectedTime;
     return todo;
   }
 

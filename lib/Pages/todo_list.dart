@@ -10,15 +10,25 @@ class TodoList extends StatefulWidget {
 }
 
 class _TodoListState extends State<TodoList> {
-  List<Todo> _todolist = DBController.instance.queryTodos();
+
+  Future<List<Todo>> _todolist;
   final _biggerFont = TextStyle(fontSize: 18.0);
+
+  @override
+  void initState() {
+    super.initState();
+    _todolist = DBController.instance.queryTodos();
+  }
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('TodoList'), actions: [
         IconButton(
-          onPressed: () {
+          onPressed: () {setState(() {
+
+          });
           },
           icon: Icon(Icons.refresh)
         ),
@@ -26,19 +36,26 @@ class _TodoListState extends State<TodoList> {
           onPressed: () {
             Navigator.of(context).push(
               MaterialPageRoute<void>(
-                  builder: (context) => AddTodo()
+                  builder: (context) => AddTodo(onTodoAdded: () => setState(() {}))
               ),
             );
           },
           icon: Icon(Icons.add),
         )
       ]),
-      body: _buildTodos(),
+      body: FutureBuilder<List<Todo>>(
+        future: DBController.instance.queryTodos(),
+        builder: (BuildContext context, AsyncSnapshot<List<Todo>> snapshot){
+          if(snapshot.hasData){
+            return _buildTodos(snapshot.data);
+          }else return CircularProgressIndicator();
+        },
+      ),
     );
   }
 
-  Widget _buildTodos() {
-    final tiles = _todolist.map(
+  Widget _buildTodos(List<Todo> list) {
+    final tiles = list.map(
       (Todo todo) {
         return ListTile(
           title: Text(

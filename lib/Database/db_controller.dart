@@ -99,17 +99,16 @@ class DBController {
     return await insert(map);
   }
 
-  List<Todo> queryTodos() {
+  Future<List<Todo>> queryTodos() async{
     List<Todo> list = List();
-    queryAllRows().then((value) {
-      for (Map map in value){
+    List<Map<String,dynamic>> maplist = await queryAllRows();
+      for (Map map in maplist){
         list.add(mapToTodo(map));
-      }
-    });
+    };
     return list;
   }
 
-  Todo mapToTodo(Map<String,dynamic> map){
+  static Todo mapToTodo(Map<String,dynamic> map){
     Todo todo = Todo(map[columnName]);
     todo.description = map[columnDescription];
     String time = map[columnTime];
