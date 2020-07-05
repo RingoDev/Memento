@@ -89,7 +89,7 @@ class _EditTodoState extends State<EditTodo> {
   void _editTodo(context) {
     //do checks if a name is entered
     print(editedTodo);
-    DBController.instance.editTodo(todo,editedTodo);
+//    DBController.instance.editTodo(todo,editedTodo);
     Navigator.of(context).pop();
   }
 

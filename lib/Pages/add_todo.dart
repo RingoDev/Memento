@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:sqflite/sqflite.dart';
 import 'package:todo/Data/todo.dart';
 import 'package:todo/Database/db_controller.dart';
 
 class AddTodo extends StatefulWidget {
   final VoidCallback onTodoAdded;
+
   AddTodo({this.onTodoAdded});
 
   @override
@@ -18,9 +18,8 @@ class _AddTodoState extends State<AddTodo> {
   String selectedDescription = "";
 
   final VoidCallback onTodoAdded;
+
   _AddTodoState(this.onTodoAdded);
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -114,8 +113,7 @@ class _AddTodoState extends State<AddTodo> {
 
   List<Widget> _createTimeRow() {
     return <Widget>[
-      Text(selectedTime.hour.toString() + ':' + selectedTime.minute.toString(),
-          style: TextStyle(fontSize: 18.0)),
+      Text(selectedTime.format(context), style: TextStyle(fontSize: 18.0)),
       IconButton(
         icon: Icon(Icons.alarm),
         onPressed: () {
@@ -140,11 +138,7 @@ class _AddTodoState extends State<AddTodo> {
   List<Widget> _createDateRow() {
     return <Widget>[
       Text(
-          selectedDate.day.toString() +
-              '.' +
-              selectedDate.month.toString() +
-              '.' +
-              selectedDate.year.toString(),
+          Todo.formatDate(selectedDate),
           style: TextStyle(fontSize: 18.0)),
       IconButton(
         icon: Icon(Icons.calendar_today),

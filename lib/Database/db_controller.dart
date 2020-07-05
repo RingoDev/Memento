@@ -102,9 +102,10 @@ class DBController {
   Future<List<Todo>> queryTodos() async{
     List<Todo> list = List();
     List<Map<String,dynamic>> maplist = await queryAllRows();
-      for (Map map in maplist){
-        list.add(mapToTodo(map));
-    };
+    for (Map map in maplist){
+      mapToTodo(map);
+      list.add(mapToTodo(map));
+    }
     return list;
   }
 
@@ -115,7 +116,14 @@ class DBController {
     List<String> timelist = time.split(":");
     todo.dueTime = TimeOfDay(hour: int.parse(timelist[0]), minute: int.parse(timelist[1]));
     todo.dueDate = DateTime.parse(map[columnDate]);
+    todo.id = int.parse(map[columnId]);
     print(todo);
     return todo;
   }
+
+//  Future<int> editTodo(Todo oldTodo, Todo newTodo){
+//    delete(oldTodo.id);
+//    newTodo.id = oldTodo.id;
+//    return insertTodo(newTodo);
+//  }
 }
