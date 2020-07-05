@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_material_color_picker/flutter_material_color_picker.dart';
 import 'package:todo/Data/todo.dart';
 import 'package:todo/Database/db_controller.dart';
 
@@ -13,19 +14,15 @@ class EditTodo extends StatefulWidget {
 }
 
 class _EditTodoState extends State<EditTodo> {
-
-
   final void Function(Todo edited) onTodoEdited;
   final Todo todo;
   Todo editedTodo;
+  Color _tempSelectedColor = Color(0xffffffff);
 
-
-  _EditTodoState(this.onTodoEdited, this.todo){
+  _EditTodoState(this.onTodoEdited, this.todo) {
     editedTodo = this.todo.copy();
     print('edited Todo: ' + editedTodo.toString());
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +41,8 @@ class _EditTodoState extends State<EditTodo> {
       child: Column(
         children: <Widget>[
           Text('Edit the Name'),
-          TextFormField(maxLength: 60,initialValue: todo.name, onChanged: _selectName),
+          TextFormField(
+              maxLength: 60, initialValue: todo.name, onChanged: _selectName),
           Text('Edit the Description'),
           TextFormField(
             initialValue: todo.description,
@@ -61,11 +59,15 @@ class _EditTodoState extends State<EditTodo> {
           Row(
               children: _createTimeRow(),
               mainAxisAlignment: MainAxisAlignment.center),
+          Text('Color'),
+          FlatButton(
+            color: editedTodo.color,
+            onPressed: () => _openColorPicker(), child: null,
+          ),
           RaisedButton(
             onPressed: () {
               _editTodo(context);
               // callback to parent widget
-
             },
             child: Text('Save TODO', style: TextStyle(fontSize: 20)),
           ),
@@ -91,11 +93,10 @@ class _EditTodoState extends State<EditTodo> {
   void _editTodo(context) {
     //do checks if a name is entered
     print(editedTodo);
-    DBController.instance.editTodo(todo,editedTodo);
+    DBController.instance.editTodo(todo, editedTodo);
     Navigator.of(context).pop();
     onTodoEdited(editedTodo);
   }
-
 
   Future<Null> _selectTime(BuildContext context) async {
     final TimeOfDay picked = await showTimePicker(
@@ -110,7 +111,8 @@ class _EditTodoState extends State<EditTodo> {
 
   List<Widget> _createTimeRow() {
     return <Widget>[
-      Text(editedTodo.dueTime.format(context), style: TextStyle(fontSize: 18.0)),
+      Text(editedTodo.dueTime.format(context),
+          style: TextStyle(fontSize: 18.0)),
       IconButton(
         icon: Icon(Icons.alarm),
         onPressed: () {
@@ -134,7 +136,8 @@ class _EditTodoState extends State<EditTodo> {
 
   List<Widget> _createDateRow() {
     return <Widget>[
-      Text(Todo.formatDate(editedTodo.dueDate), style: TextStyle(fontSize: 18.0)),
+      Text(Todo.formatDate(editedTodo.dueDate),
+          style: TextStyle(fontSize: 18.0)),
       IconButton(
         icon: Icon(Icons.calendar_today),
         onPressed: () {
@@ -142,5 +145,36 @@ class _EditTodoState extends State<EditTodo> {
         },
       )
     ];
+  }
+
+  void _openColorPicker(){
+    showDialog(
+      context: context,
+      builder: (builder) {
+        return AlertDialog(
+          contentPadding: const EdgeInsets.all(6.0),
+          title: Text('Choose a Color'),
+          content: MaterialColorPicker(
+            selectedColor: _tempSelectedColor,
+            onColorChange: (color) => setState(() => _tempSelectedColor = color),
+//            onMainColorChange: (color) => setState(() => _tempMainColor = color),
+            onBack: () => print("Back button pressed"),
+          ),
+          actions: [
+            FlatButton(
+              child: Text('CANCEL'),
+              onPressed: Navigator.of(context).pop,
+            ),
+            FlatButton(
+              child: Text('SUBMIT'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                setState(() => editedTodo.color = _tempSelectedColor);
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 }

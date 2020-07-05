@@ -13,6 +13,7 @@ class DBController {
   static final columnDescription = 'description';
   static final columnDate = 'due_date';
   static final columnTime = 'due_time';
+  static final columnColor = 'color';
 
   // make this a singleton class
   DBController._privateConstructor();
@@ -32,22 +33,39 @@ class DBController {
   // this opens the database (and creates it if it doesn't exist)
   _initDatabase() async {
     return await openDatabase(join(await getDatabasesPath(), _databaseName),
-        version: 1,
-        onCreate: _onCreate);
+        version: 3, onCreate: _onCreate,onUpgrade: _onUpgrade);
   }
 
   // SQL code to create the database table
   Future _onCreate(Database db, int version) async {
+    print('created db');
     await db.execute('''
           CREATE TABLE $table (
             $columnId INTEGER PRIMARY KEY,
             $columnName TEXT NOT NULL,
             $columnDescription TEXT,
             $columnDate TEXT NOT NULL,
-            $columnTime TEXT NOT NULL
+            $columnTime TEXT NOT NULL,
+            $columnColor TEXT NOT NULL
           )
           ''');
   }
+
+  Future _onUpgrade(Database db, int oldVersion, int newVersion)async{
+    print('upgraded db');
+    await db.execute('''
+          CREATE TABLE $table (
+            $columnId INTEGER PRIMARY KEY,
+            $columnName TEXT NOT NULL,
+            $columnDescription TEXT,
+            $columnDate TEXT NOT NULL,
+            $columnTime TEXT NOT NULL,
+            $columnColor TEXT NOT NULL
+          )
+          ''');
+  }
+
+
 
   // Helper methods
 
@@ -94,35 +112,49 @@ class DBController {
     map.putIfAbsent(columnName, () => todo.name);
     map.putIfAbsent(columnDescription, () => todo.description);
     map.putIfAbsent(columnDate, () => todo.dueDate.toIso8601String());
-    map.putIfAbsent(columnTime, () => todo.dueTime.hour.toString() + ':' + todo.dueTime.minute.toString());
+    map.putIfAbsent(
+        columnTime,
+        () =>
+            todo.dueTime.hour.toString() +
+            ':' +
+            todo.dueTime.minute.toString());
+    map.putIfAbsent(columnColor, () => Todo.toARGBString(todo.color));
+    print('got here');
     print(map);
     return await insert(map);
   }
 
-  Future<List<Todo>> queryTodos() async{
+  Future<List<Todo>> queryTodos() async {
     List<Todo> list = List();
-    List<Map<String,dynamic>> maplist = await queryAllRows();
-    for (Map map in maplist){
+    List<Map<String, dynamic>> maplist = await queryAllRows();
+    for (Map map in maplist) {
       list.add(mapToTodo(map));
     }
     return list;
   }
 
-  static Todo mapToTodo(Map<String,dynamic> map){
+  static Todo mapToTodo(Map<String, dynamic> map) {
     Todo todo = Todo(map[columnName]);
     todo.description = map[columnDescription];
     String time = map[columnTime];
     List<String> timelist = time.split(":");
-    todo.dueTime = TimeOfDay(hour: int.parse(timelist[0]), minute: int.parse(timelist[1]));
+    todo.dueTime =
+        TimeOfDay(hour: int.parse(timelist[0]), minute: int.parse(timelist[1]));
     todo.dueDate = DateTime.parse(map[columnDate]);
     todo.id = map[columnId];
+    todo.color = Todo.fromARGBString(map[columnColor]);
     print(todo);
     return todo;
   }
 
-  Future<int> editTodo(Todo oldTodo, Todo newTodo){
+  Future<int> editTodo(Todo oldTodo, Todo newTodo) {
     delete(oldTodo.id);
     newTodo.id = oldTodo.id;
     return insertTodo(newTodo);
+  }
+
+  Future<void> deleteTable() async {
+    Database db = await instance.database;
+    return await db.execute('DROP TABLE IF EXISTS ' + table);
   }
 }

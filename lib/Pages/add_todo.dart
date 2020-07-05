@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:todo/Data/todo.dart';
 import 'package:todo/Database/db_controller.dart';
+import 'package:flutter_material_color_picker/flutter_material_color_picker.dart';
 
 class AddTodo extends StatefulWidget {
   final VoidCallback onTodoAdded;
@@ -16,6 +17,8 @@ class _AddTodoState extends State<AddTodo> {
   TimeOfDay selectedTime = TimeOfDay.now();
   String selectedName = "";
   String selectedDescription = "";
+  Color selectedColor = Color(0xffffffff);
+  Color _tempSelectedColor = Color(0xffffffff);
 
   final VoidCallback onTodoAdded;
 
@@ -54,6 +57,12 @@ class _AddTodoState extends State<AddTodo> {
           Row(
               children: _createTimeRow(),
               mainAxisAlignment: MainAxisAlignment.center),
+          Text('Color'),
+          FlatButton(
+            color: selectedColor,
+            onPressed: () => _openColorPicker(), child: null,
+          ),
+
           RaisedButton(
             onPressed: () {
               _saveTodo(context);
@@ -97,6 +106,7 @@ class _AddTodoState extends State<AddTodo> {
     todo.description = selectedDescription;
     todo.dueDate = selectedDate;
     todo.dueTime = selectedTime;
+    todo.color = selectedColor;
     return todo;
   }
 
@@ -135,6 +145,7 @@ class _AddTodoState extends State<AddTodo> {
       });
   }
 
+
   List<Widget> _createDateRow() {
     return <Widget>[
       Text(
@@ -147,5 +158,36 @@ class _AddTodoState extends State<AddTodo> {
         },
       )
     ];
+  }
+
+  void _openColorPicker(){
+    showDialog(
+      context: context,
+      builder: (builder) {
+        return AlertDialog(
+          contentPadding: const EdgeInsets.all(6.0),
+          title: Text('Choose a Color'),
+          content: MaterialColorPicker(
+            selectedColor: _tempSelectedColor,
+            onColorChange: (color) => setState(() => _tempSelectedColor = color),
+//            onMainColorChange: (color) => setState(() => _tempMainColor = color),
+            onBack: () => print("Back button pressed"),
+          ),
+          actions: [
+            FlatButton(
+              child: Text('CANCEL'),
+              onPressed: Navigator.of(context).pop,
+            ),
+            FlatButton(
+              child: Text('SUBMIT'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                setState(() => selectedColor = _tempSelectedColor);
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 }

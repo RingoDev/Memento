@@ -38,28 +38,32 @@ class _TodoListState extends State<TodoList> {
           if (snapshot.hasData) {
             return _buildTodos(snapshot.data);
           } else
-            return Center(child:CircularProgressIndicator());
+            return Center(child: CircularProgressIndicator());
         },
       ),
     );
   }
 
   Widget _buildTodos(List<Todo> list) {
-    list.sort((a,b){
+    list.sort((a, b) {
       return a.dueDate.compareTo(b.dueDate);
     });
     final tiles = list.map(
       (Todo todo) {
-        return ListTile(
-            title: Text(
-              todo.name + '  ' +Todo.formatDate(todo.dueDate),
-              style: _biggerFont,
-            ),
-            onTap: () => {
-                  Navigator.of(context).push(
-                    MaterialPageRoute<void>(builder: (context) => TodoDetail(() => setState((){}) ,todo)),
-                  ),
-                });
+        return Ink(
+            color: todo.color,
+            child: ListTile(
+                title: Text(
+                  todo.name + '  ' + Todo.formatDate(todo.dueDate),
+                  style: _biggerFont,
+                ),
+                onTap: () => {
+                      Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                            builder: (context) =>
+                                TodoDetail(() => setState(() {}), todo)),
+                      ),
+                    }));
       },
     );
 
