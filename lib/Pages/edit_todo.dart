@@ -3,25 +3,26 @@ import 'package:todo/Data/todo.dart';
 import 'package:todo/Database/db_controller.dart';
 
 class EditTodo extends StatefulWidget {
-  final VoidCallback onTodoChanged;
+  final void Function(Todo edited) onTodoEdited;
   final Todo todo;
 
-  EditTodo({this.onTodoChanged, this.todo});
+  EditTodo({this.onTodoEdited, this.todo});
 
   @override
-  _EditTodoState createState() => _EditTodoState(this.onTodoChanged, this.todo);
+  _EditTodoState createState() => _EditTodoState(this.onTodoEdited, this.todo);
 }
 
 class _EditTodoState extends State<EditTodo> {
 
 
-  final VoidCallback onTodoChanged;
+  final void Function(Todo edited) onTodoEdited;
   final Todo todo;
   Todo editedTodo;
 
 
-  _EditTodoState(this.onTodoChanged, this.todo){
+  _EditTodoState(this.onTodoEdited, this.todo){
     editedTodo = this.todo.copy();
+    print('edited Todo: ' + editedTodo.toString());
   }
 
 
@@ -43,9 +44,10 @@ class _EditTodoState extends State<EditTodo> {
       child: Column(
         children: <Widget>[
           Text('Edit the Name'),
-          TextField(maxLength: 60, onChanged: _selectName),
+          TextFormField(maxLength: 60,initialValue: todo.name, onChanged: _selectName),
           Text('Edit the Description'),
-          TextField(
+          TextFormField(
+            initialValue: todo.description,
             keyboardType: TextInputType.multiline,
             maxLines: null,
             onChanged: _selectDescription,
@@ -63,7 +65,7 @@ class _EditTodoState extends State<EditTodo> {
             onPressed: () {
               _editTodo(context);
               // callback to parent widget
-              onTodoChanged();
+
             },
             child: Text('Save TODO', style: TextStyle(fontSize: 20)),
           ),
@@ -89,8 +91,9 @@ class _EditTodoState extends State<EditTodo> {
   void _editTodo(context) {
     //do checks if a name is entered
     print(editedTodo);
-//    DBController.instance.editTodo(todo,editedTodo);
+    DBController.instance.editTodo(todo,editedTodo);
     Navigator.of(context).pop();
+    onTodoEdited(editedTodo);
   }
 
 

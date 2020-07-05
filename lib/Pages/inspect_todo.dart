@@ -1,20 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:todo/Data/todo.dart';
+import 'edit_todo.dart';
 
 class TodoDetail extends StatefulWidget {
+
+  final VoidCallback onTodoChanged;
   Todo todo;
 
-  TodoDetail(this.todo);
+  TodoDetail(this.onTodoChanged,this.todo);
 
   @override
-  _TodoDetailState createState() => _TodoDetailState(this.todo);
+  _TodoDetailState createState() => _TodoDetailState(this.onTodoChanged,this.todo);
 }
 
 class _TodoDetailState extends State<TodoDetail> {
   final _biggerFont = TextStyle(fontSize: 18.0);
   Todo todo;
+  final VoidCallback onTodoChanged;
 
-  _TodoDetailState(this.todo);
+  _TodoDetailState(this.onTodoChanged,this.todo);
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +27,7 @@ class _TodoDetailState extends State<TodoDetail> {
           title: Text(todo.name),
           actions: <Widget>[IconButton(
             icon: Icon(Icons.edit),
-            onPressed: () => _editTodo(todo),
+            onPressed: () => _editTodo(),
           )],
         ),
         body: Center(child: _createTodo(todo)));
@@ -48,7 +52,9 @@ class _TodoDetailState extends State<TodoDetail> {
     );
   }
 
-  void _editTodo(Todo todo){
-    // open add_todo with data from todo
+  void _editTodo(){
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(builder: (context) => EditTodo(onTodoEdited: (Todo edited) => setState(() {todo = edited;onTodoChanged();}) ,todo: todo)),
+    );
   }
 }

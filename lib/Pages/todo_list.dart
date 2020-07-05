@@ -45,16 +45,19 @@ class _TodoListState extends State<TodoList> {
   }
 
   Widget _buildTodos(List<Todo> list) {
+    list.sort((a,b){
+      return a.dueDate.compareTo(b.dueDate);
+    });
     final tiles = list.map(
       (Todo todo) {
         return ListTile(
             title: Text(
-              todo.name,
+              todo.name + '  ' +Todo.formatDate(todo.dueDate),
               style: _biggerFont,
             ),
             onTap: () => {
                   Navigator.of(context).push(
-                    MaterialPageRoute<void>(builder: (context) => TodoDetail(todo)),
+                    MaterialPageRoute<void>(builder: (context) => TodoDetail(() => setState((){}) ,todo)),
                   ),
                 });
       },

@@ -18,7 +18,7 @@ class Todo {
 
   @override
   String toString() {
-    return 'id' +
+    return 'id: ' +
         id.toString() +
         '\nname: ' +
         name +
