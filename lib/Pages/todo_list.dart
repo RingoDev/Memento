@@ -63,7 +63,8 @@ class _TodoListState extends State<TodoList> {
                             builder: (context) =>
                                 TodoDetail(() => setState(() {}), todo)),
                       ),
-                    }));
+                    },
+                onLongPress: () => _removeTodo(todo)));
       },
     );
 
@@ -73,5 +74,11 @@ class _TodoListState extends State<TodoList> {
     ).toList();
 
     return ListView(children: divided);
+  }
+
+  //TODO hold an intern list of todos to work with and do database queries in parallel
+  void _removeTodo(Todo todo){
+    DBController.instance.delete(todo.id);
+    setState(() {});
   }
 }
