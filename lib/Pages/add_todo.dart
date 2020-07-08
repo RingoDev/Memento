@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:todo/Data/todo.dart';
-import 'package:todo/Database/db_controller.dart';
 import 'package:flutter_material_color_picker/flutter_material_color_picker.dart';
+import 'package:todo/main.dart';
 
 class AddTodo extends StatefulWidget {
-  final VoidCallback onTodoAdded;
+  final void Function(Todo edited) onTodoAdded;
 
   AddTodo({this.onTodoAdded});
 
@@ -13,14 +13,12 @@ class AddTodo extends StatefulWidget {
 }
 
 class _AddTodoState extends State<AddTodo> {
-  DateTime selectedDate = DateTime.now();
-  TimeOfDay selectedTime = TimeOfDay.now();
-  String selectedName = "";
-  String selectedDescription = "";
-  Color selectedColor = Color(0xffffffff);
+
+  Todo todo = Todo();
   Color _tempSelectedColor = Color(0xffffffff);
 
-  final VoidCallback onTodoAdded;
+  final void Function(Todo edited) onTodoAdded;
+
 
   _AddTodoState(this.onTodoAdded);
 
@@ -59,15 +57,15 @@ class _AddTodoState extends State<AddTodo> {
               mainAxisAlignment: MainAxisAlignment.center),
           Text('Color'),
           FlatButton(
-            color: selectedColor,
+            color: todo.color,
             onPressed: () => _openColorPicker(), child: null,
           ),
 
           RaisedButton(
             onPressed: () {
               _saveTodo(context);
-              // callback to parent widget
-              onTodoAdded();
+              // callback to parent widget to set state
+              onTodoAdded(todo);
             },
             child: Text('Save TODO', style: TextStyle(fontSize: 20)),
           ),
@@ -77,53 +75,48 @@ class _AddTodoState extends State<AddTodo> {
   }
 
   void _selectName(String str) {
-    if (str != null && str != selectedName)
+    if (str != null && str != todo.name)
       setState(() {
-        selectedName = str;
+        todo.name = str;
       });
   }
 
   void _selectDescription(String str) {
-    if (str != null && str != selectedDescription)
+    if (str != null && str != todo.description)
       setState(() {
-        selectedDescription = str;
+        todo.description = str;
       });
   }
 
   void _saveTodo(context) {
-    //do checks if a name is entered
-    Todo toSave = _createTodo();
-    print(toSave);
-    DBController.instance.insertTodo(toSave);
-    //to pop todo adder from Navigator
+
+    todo.id = MyApp.model.nextID;
+
+    ///saves to model and DB
+    MyApp.model.add(todo);
+
+    /// returning to previous page
     Navigator.of(context).pop();
 
-    //update state of Todolist
   }
 
-  Todo _createTodo() {
-    Todo todo = Todo(selectedName);
-    todo.description = selectedDescription;
-    todo.dueDate = selectedDate;
-    todo.dueTime = selectedTime;
-    todo.color = selectedColor;
-    return todo;
-  }
+
+
 
   Future<Null> _selectTime(BuildContext context) async {
     final TimeOfDay picked = await showTimePicker(
       context: context,
-      initialTime: selectedTime,
+      initialTime: todo.dueTime,
     );
-    if (picked != null && picked != selectedTime)
+    if (picked != null && picked != todo.dueTime)
       setState(() {
-        selectedTime = picked;
+        todo.dueTime = picked;
       });
   }
 
   List<Widget> _createTimeRow() {
     return <Widget>[
-      Text(selectedTime.format(context), style: TextStyle(fontSize: 18.0)),
+      Text(todo.dueTime.format(context), style: TextStyle(fontSize: 18.0)),
       IconButton(
         icon: Icon(Icons.alarm),
         onPressed: () {
@@ -136,12 +129,12 @@ class _AddTodoState extends State<AddTodo> {
   Future<Null> _selectDate(BuildContext context) async {
     final DateTime picked = await showDatePicker(
         context: context,
-        initialDate: selectedDate,
+        initialDate: todo.dueDate,
         firstDate: DateTime(2015, 8),
         lastDate: DateTime(2101));
-    if (picked != null && picked != selectedDate)
+    if (picked != null && picked != todo.dueDate)
       setState(() {
-        selectedDate = picked;
+        todo.dueDate = picked;
       });
   }
 
@@ -149,7 +142,7 @@ class _AddTodoState extends State<AddTodo> {
   List<Widget> _createDateRow() {
     return <Widget>[
       Text(
-          Todo.formatDate(selectedDate),
+          Todo.formatDate(todo.dueDate),
           style: TextStyle(fontSize: 18.0)),
       IconButton(
         icon: Icon(Icons.calendar_today),
@@ -170,8 +163,6 @@ class _AddTodoState extends State<AddTodo> {
           content: MaterialColorPicker(
             selectedColor: _tempSelectedColor,
             onColorChange: (color) => setState(() => _tempSelectedColor = color),
-//            onMainColorChange: (color) => setState(() => _tempMainColor = color),
-            onBack: () => print("Back button pressed"),
           ),
           actions: [
             FlatButton(
@@ -182,7 +173,7 @@ class _AddTodoState extends State<AddTodo> {
               child: Text('SUBMIT'),
               onPressed: () {
                 Navigator.of(context).pop();
-                setState(() => selectedColor = _tempSelectedColor);
+                setState(() => todo.color = _tempSelectedColor);
               },
             ),
           ],

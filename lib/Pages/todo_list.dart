@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:todo/Database/db_controller.dart';
 import 'package:todo/Pages/inspect_todo.dart';
+import 'package:todo/main.dart';
 import '../Data/todo.dart';
 import 'add_todo.dart';
 
 class TodoList extends StatefulWidget {
+
+  TodoList();
+
   @override
   _TodoListState createState() => _TodoListState();
 }
@@ -12,43 +15,46 @@ class TodoList extends StatefulWidget {
 class _TodoListState extends State<TodoList> {
   final _biggerFont = TextStyle(fontSize: 18.0);
 
+
+  _TodoListState();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('TodoList'), actions: [
-        IconButton(
+        appBar: AppBar(title: Text('TodoList'), actions: [
+          IconButton(
+              onPressed: () {
+                setState(() {});
+              },
+              icon: Icon(Icons.refresh)),
+          IconButton(
             onPressed: () {
-              setState(() {});
+              Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                    builder: (context) =>
+                        AddTodo(onTodoAdded: (Todo added) => {
+                          setState((){}),
+                          pushDetailPage(added)
+                        })
+                ),
+              );
             },
-            icon: Icon(Icons.refresh)),
-        IconButton(
-          onPressed: () {
-            Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                  builder: (context) =>
-                      AddTodo(onTodoAdded: () => setState(() {}))),
-            );
-          },
-          icon: Icon(Icons.add),
-        )
-      ]),
-      body: FutureBuilder<List<Todo>>(
-        future: DBController.instance.queryTodos(),
-        builder: (BuildContext context, AsyncSnapshot<List<Todo>> snapshot) {
-          if (snapshot.hasData) {
-            return _buildTodos(snapshot.data);
-          } else
-            return Center(child: CircularProgressIndicator());
-        },
-      ),
+            icon: Icon(Icons.add),
+          )
+        ]),
+        body: _buildTodos());
+  }
+
+  void pushDetailPage(Todo toInspect){
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+          builder: (context) =>
+              TodoDetail(() => setState(() {}), toInspect)),
     );
   }
 
-  Widget _buildTodos(List<Todo> list) {
-    list.sort((a, b) {
-      return a.dueDate.compareTo(b.dueDate);
-    });
-    final tiles = list.map(
+  Widget _buildTodos() {
+    final tiles = MyApp.model.todoList.map(
       (Todo todo) {
         return Ink(
             color: todo.color,
@@ -58,27 +64,20 @@ class _TodoListState extends State<TodoList> {
                   style: _biggerFont,
                 ),
                 onTap: () => {
-                      Navigator.of(context).push(
-                        MaterialPageRoute<void>(
-                            builder: (context) =>
-                                TodoDetail(() => setState(() {}), todo)),
-                      ),
+                  pushDetailPage(todo)
                     },
-                onLongPress: () => _removeTodo(todo)));
+                onLongPress: () => {
+                  MyApp.model.remove(todo),
+                  setState((){})
+                }));
       },
     );
-
     final divided = ListTile.divideTiles(
       context: context,
       tiles: tiles,
     ).toList();
-
     return ListView(children: divided);
   }
 
-  //TODO hold an intern list of todos to work with and do database queries in parallel
-  void _removeTodo(Todo todo){
-    DBController.instance.delete(todo.id);
-    setState(() {});
-  }
+
 }

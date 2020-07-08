@@ -32,12 +32,12 @@ class _TodoDetailState extends State<TodoDetail> {
           )
         ],
       ),
-      body: Center(child: _createTodo(todo)),
+      body: Center(child: _buildTodo(todo)),
       backgroundColor: todo.color,
     );
   }
 
-  Widget _createTodo(todo) {
+  Widget _buildTodo(todo) {
     return Column(
       children: <Widget>[
         Text(
@@ -64,7 +64,8 @@ class _TodoDetailState extends State<TodoDetail> {
                     todo = edited;
                     onTodoChanged();
                   }),
-              todo: todo)),
+              todo: todo)
+      ),
     );
   }
 }

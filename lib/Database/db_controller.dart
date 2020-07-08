@@ -33,7 +33,7 @@ class DBController {
   // this opens the database (and creates it if it doesn't exist)
   _initDatabase() async {
     return await openDatabase(join(await getDatabasesPath(), _databaseName),
-        version: 3, onCreate: _onCreate,onUpgrade: _onUpgrade);
+        version: 3, onCreate: _onCreate, onUpgrade: _onUpgrade);
   }
 
   // SQL code to create the database table
@@ -51,7 +51,7 @@ class DBController {
           ''');
   }
 
-  Future _onUpgrade(Database db, int oldVersion, int newVersion)async{
+  Future _onUpgrade(Database db, int oldVersion, int newVersion) async {
     print('upgraded db');
     await db.execute('''
           CREATE TABLE $table (
@@ -64,8 +64,6 @@ class DBController {
           )
           ''');
   }
-
-
 
   // Helper methods
 
@@ -107,6 +105,7 @@ class DBController {
     return await db.delete(table, where: '$columnId = ?', whereArgs: [id]);
   }
 
+  /// inserts a To\do into the SQLite Database
   Future<int> insertTodo(Todo todo) async {
     Map map = Map<String, dynamic>();
     map.putIfAbsent(columnName, () => todo.name);
@@ -119,42 +118,41 @@ class DBController {
             ':' +
             todo.dueTime.minute.toString());
     map.putIfAbsent(columnColor, () => Todo.toARGBString(todo.color));
-    print('got here');
-    print(map);
+    if (todo.id != -1)
+      map.putIfAbsent(columnId, () => todo.id);
+    else
+      print('ID WAS -1 !!!');
     return await insert(map);
   }
 
-  Future<List<Todo>> queryTodos() async {
-    List<Todo> list = List();
-    List<Map<String, dynamic>> maplist = await queryAllRows();
-    for (Map map in maplist) {
-      list.add(mapToTodo(map));
+  /// queries the SQLite Database for all the saved Todos and returns them as a Map<ID,To\do>
+  Future<Map<int, Todo>> queryTodos() async {
+    Map<int, Todo> result = Map();
+    List<Map<String, dynamic>> mapList = await queryAllRows();
+    for (Map map in mapList) {
+      result.putIfAbsent(map[columnId], () => mapToTodo(map));
     }
-    return list;
+    return result;
   }
 
+  /// transforms a query ResultMap to a To\do
   static Todo mapToTodo(Map<String, dynamic> map) {
-    Todo todo = Todo(map[columnName]);
-    todo.description = map[columnDescription];
-    String time = map[columnTime];
-    List<String> timelist = time.split(":");
-    todo.dueTime =
-        TimeOfDay(hour: int.parse(timelist[0]), minute: int.parse(timelist[1]));
-    todo.dueDate = DateTime.parse(map[columnDate]);
-    todo.id = map[columnId];
-    todo.color = Todo.fromARGBString(map[columnColor]);
-    print(todo);
+    Todo todo = new Todo(
+        name: map[columnName],
+        description: map[columnDescription],
+        dueTime: TimeOfDay(
+            hour: int.parse(map[columnTime].split(":")[0]),
+            minute: int.parse(map[columnTime].split(":")[1])),
+        dueDate: DateTime.parse(map[columnDate]),
+        id: map[columnId],
+        color: Todo.fromARGBString(map[columnColor]));
     return todo;
   }
 
+  /// edits a To\do by removing the To\do from the table and then adding the edited one with the old ID
   Future<int> editTodo(Todo oldTodo, Todo newTodo) {
     delete(oldTodo.id);
     newTodo.id = oldTodo.id;
     return insertTodo(newTodo);
-  }
-
-  Future<void> deleteTable() async {
-    Database db = await instance.database;
-    return await db.execute('DROP TABLE IF EXISTS ' + table);
   }
 }

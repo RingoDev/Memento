@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_material_color_picker/flutter_material_color_picker.dart';
 import 'package:todo/Data/todo.dart';
-import 'package:todo/Database/db_controller.dart';
+import 'package:todo/main.dart';
 
 class EditTodo extends StatefulWidget {
   final void Function(Todo edited) onTodoEdited;
   final Todo todo;
+
 
   EditTodo({this.onTodoEdited, this.todo});
 
@@ -14,10 +15,13 @@ class EditTodo extends StatefulWidget {
 }
 
 class _EditTodoState extends State<EditTodo> {
+  /// callback to signal the change of the To\do
   final void Function(Todo edited) onTodoEdited;
+  /// the unedited To\do
   final Todo todo;
+  /// the edited To\do
   Todo editedTodo;
-  Color _tempSelectedColor = Color(0xffffffff);
+  Color _tempSelectedColor = MyApp.model.color;
 
   _EditTodoState(this.onTodoEdited, this.todo) {
     editedTodo = this.todo.copy();
@@ -91,10 +95,13 @@ class _EditTodoState extends State<EditTodo> {
   }
 
   void _editTodo(context) {
-    //do checks if a name is entered
-    print(editedTodo);
-    DBController.instance.editTodo(todo, editedTodo);
+
+    MyApp.model.edit(todo,editedTodo);
+
+    /// returning to previous page
     Navigator.of(context).pop();
+
+    /// callback to previous page to set state
     onTodoEdited(editedTodo);
   }
 
@@ -157,8 +164,6 @@ class _EditTodoState extends State<EditTodo> {
           content: MaterialColorPicker(
             selectedColor: _tempSelectedColor,
             onColorChange: (color) => setState(() => _tempSelectedColor = color),
-//            onMainColorChange: (color) => setState(() => _tempMainColor = color),
-            onBack: () => print("Back button pressed"),
           ),
           actions: [
             FlatButton(
