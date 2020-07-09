@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 import 'dart:async';
 import 'package:path/path.dart';
@@ -11,8 +10,7 @@ class DBController {
   static final columnId = '_id';
   static final columnName = 'name';
   static final columnDescription = 'description';
-  static final columnDate = 'due_date';
-  static final columnTime = 'due_time';
+  static final columnDeadline = 'deadline';
   static final columnColor = 'color';
 
   // make this a singleton class
@@ -33,7 +31,7 @@ class DBController {
   // this opens the database (and creates it if it doesn't exist)
   _initDatabase() async {
     return await openDatabase(join(await getDatabasesPath(), _databaseName),
-        version: 3, onCreate: _onCreate, onUpgrade: _onUpgrade);
+        version: 5, onCreate: _onCreate, onUpgrade: _onUpgrade);
   }
 
   // SQL code to create the database table
@@ -44,8 +42,7 @@ class DBController {
             $columnId INTEGER PRIMARY KEY,
             $columnName TEXT NOT NULL,
             $columnDescription TEXT,
-            $columnDate TEXT NOT NULL,
-            $columnTime TEXT NOT NULL,
+            $columnDeadline TEXT NOT NULL,
             $columnColor TEXT NOT NULL
           )
           ''');
@@ -53,13 +50,13 @@ class DBController {
 
   Future _onUpgrade(Database db, int oldVersion, int newVersion) async {
     print('upgraded db');
+    await db.execute('DROP TABLE IF EXISTS ' + table);
     await db.execute('''
           CREATE TABLE $table (
             $columnId INTEGER PRIMARY KEY,
             $columnName TEXT NOT NULL,
             $columnDescription TEXT,
-            $columnDate TEXT NOT NULL,
-            $columnTime TEXT NOT NULL,
+            $columnDeadline TEXT NOT NULL,
             $columnColor TEXT NOT NULL
           )
           ''');
@@ -105,18 +102,17 @@ class DBController {
     return await db.delete(table, where: '$columnId = ?', whereArgs: [id]);
   }
 
+  Future<int> deleteAll() async {
+    Database db = await instance.database;
+    return await db.delete(table);
+  }
+
   /// inserts a To\do into the SQLite Database
   Future<int> insertTodo(Todo todo) async {
     Map map = Map<String, dynamic>();
     map.putIfAbsent(columnName, () => todo.name);
     map.putIfAbsent(columnDescription, () => todo.description);
-    map.putIfAbsent(columnDate, () => todo.dueDate.toIso8601String());
-    map.putIfAbsent(
-        columnTime,
-        () =>
-            todo.dueTime.hour.toString() +
-            ':' +
-            todo.dueTime.minute.toString());
+    map.putIfAbsent(columnDeadline, () => todo.deadline.toIso8601String());
     map.putIfAbsent(columnColor, () => Todo.toARGBString(todo.color));
     if (todo.id != -1)
       map.putIfAbsent(columnId, () => todo.id);
@@ -140,19 +136,9 @@ class DBController {
     Todo todo = new Todo(
         name: map[columnName],
         description: map[columnDescription],
-        dueTime: TimeOfDay(
-            hour: int.parse(map[columnTime].split(":")[0]),
-            minute: int.parse(map[columnTime].split(":")[1])),
-        dueDate: DateTime.parse(map[columnDate]),
+        deadline: DateTime.parse(map[columnDeadline]),
         id: map[columnId],
         color: Todo.fromARGBString(map[columnColor]));
     return todo;
-  }
-
-  /// edits a To\do by removing the To\do from the table and then adding the edited one with the old ID
-  Future<int> editTodo(Todo oldTodo, Todo newTodo) {
-    delete(oldTodo.id);
-    newTodo.id = oldTodo.id;
-    return insertTodo(newTodo);
   }
 }

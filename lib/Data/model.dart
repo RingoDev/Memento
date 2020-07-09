@@ -11,7 +11,7 @@ class Model {
   List<Todo> get todoList {
     List<Todo> list = map.values.toList();
     list.sort((a, b) {
-      return a.dueDate.compareTo(b.dueDate);
+      return a.deadline.compareTo(b.deadline);
     });
     return list;
   }
@@ -32,6 +32,8 @@ class Model {
   /// to make sure DB and model are always at the same state only use these access methods.
 
   void add(Todo todo) {
+    todo.id = nextID;
+
     /// add to model
     map.putIfAbsent(todo.id, () => todo);
 
@@ -56,5 +58,13 @@ class Model {
     DBController.instance.delete(old.id);
     edited.id = old.id;
     DBController.instance.insertTodo(edited);
+  }
+
+  void removeAll() {
+    /// remove All from model
+    map.clear();
+
+    /// remove All from DB
+    DBController.instance.deleteAll();
   }
 }

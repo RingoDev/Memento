@@ -7,9 +7,8 @@ class Todo {
   String description;
   DateTime madeDate;
   TimeOfDay madeTime;
-  DateTime dueDate;
-  TimeOfDay dueTime;
-  
+  DateTime deadline;
+
   Todo(
       {Color color,
       this.id = -1,
@@ -17,19 +16,21 @@ class Todo {
       this.description = "",
       DateTime madeDate,
       TimeOfDay madeTime,
-      DateTime dueDate,
-      TimeOfDay dueTime})
+      DateTime deadline})
       : this.color = color ?? Color(0xffffffff),
         this.madeDate = madeDate ?? DateTime.now(),
         this.madeTime = madeTime ?? TimeOfDay.now(),
-        this.dueDate = dueDate ?? DateTime.now(),
-        this.dueTime = dueTime ?? TimeOfDay.now();
+        this.deadline = deadline ?? DateTime.now();
 
-  Todo.noID(
-      this.name, this.description, this.dueDate, this.dueTime, this.color);
+  void setTime(TimeOfDay time) {
+    this.deadline = DateTime(
+        deadline.year, deadline.month, deadline.day, time.hour, time.minute);
+  }
 
-  Todo.complete(this.id, this.name, this.description, this.dueDate,
-      this.dueTime, this.color);
+  void setDate(DateTime date) {
+    this.deadline = DateTime(date.year, date.month, date.day,
+        this.deadline.hour, this.deadline.minute);
+  }
 
   @override
   String toString() {
@@ -41,10 +42,8 @@ class Todo {
         description +
         '\nColor: ' +
         color.toString() +
-        '\nDueDate: ' +
-        dueDate.toIso8601String() +
-        '\nDueTime: ' +
-        dueTime.toString();
+        '\nDeadline: ' +
+        deadline.toIso8601String();
   }
 
   /// formats a DateTime object to a String such as dd.mm.yyyy
@@ -57,8 +56,12 @@ class Todo {
   }
 
   Todo copy() {
-    return Todo.complete(this.id, this.name, this.description, this.dueDate,
-        this.dueTime, this.color);
+    return Todo(
+        id: this.id,
+        name: this.name,
+        description: this.description,
+        deadline: this.deadline,
+        color: this.color);
   }
 
   /// converts a String with the Format: (255,255,255,255) to a Color Object

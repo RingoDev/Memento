@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:todo/Pages/inspect_todo.dart';
 import 'package:todo/main.dart';
 import '../Data/todo.dart';
-import 'add_todo.dart';
+import 'edit_todo.dart';
 
 class TodoList extends StatefulWidget {
-
   TodoList();
 
   @override
@@ -14,7 +13,6 @@ class TodoList extends StatefulWidget {
 
 class _TodoListState extends State<TodoList> {
   final _biggerFont = TextStyle(fontSize: 18.0);
-
 
   _TodoListState();
 
@@ -31,25 +29,29 @@ class _TodoListState extends State<TodoList> {
             onPressed: () {
               Navigator.of(context).push(
                 MaterialPageRoute<void>(
-                    builder: (context) =>
-                        AddTodo(onTodoAdded: (Todo added) => {
-                          setState((){}),
-                          pushDetailPage(added)
-                        })
-                ),
+                    builder: (context) => EditTodo(
+                        false,
+                        (Todo added) =>
+                            {setState(() {}), pushDetailPage(added)})),
               );
             },
             icon: Icon(Icons.add),
+          ),
+          IconButton(
+            onPressed: () {
+              MyApp.model.removeAll();
+              setState(() {});
+            },
+            icon: Icon(Icons.delete),
           )
         ]),
         body: _buildTodos());
   }
 
-  void pushDetailPage(Todo toInspect){
+  void pushDetailPage(Todo toInspect) {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-          builder: (context) =>
-              TodoDetail(() => setState(() {}), toInspect)),
+          builder: (context) => TodoDetail(() => setState(() {}), toInspect)),
     );
   }
 
@@ -60,16 +62,12 @@ class _TodoListState extends State<TodoList> {
             color: todo.color,
             child: ListTile(
                 title: Text(
-                  todo.name + '  ' + Todo.formatDate(todo.dueDate),
+                  todo.name + '  ' + Todo.formatDate(todo.deadline),
                   style: _biggerFont,
                 ),
-                onTap: () => {
-                  pushDetailPage(todo)
-                    },
-                onLongPress: () => {
-                  MyApp.model.remove(todo),
-                  setState((){})
-                }));
+                onTap: () => {pushDetailPage(todo)},
+                onLongPress: () =>
+                    {MyApp.model.remove(todo), setState(() {})}));
       },
     );
     final divided = ListTile.divideTiles(
@@ -78,6 +76,4 @@ class _TodoListState extends State<TodoList> {
     ).toList();
     return ListView(children: divided);
   }
-
-
 }

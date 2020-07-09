@@ -45,13 +45,9 @@ class _TodoDetailState extends State<TodoDetail> {
           style: _biggerFont,
         ),
         Text(
-          Todo.formatDate(todo.dueDate),
+          todo.deadline.toString(),
           style: _biggerFont,
         ),
-        Text(
-          todo.dueTime.format(context),
-          style: _biggerFont,
-        )
       ],
     );
   }
@@ -59,13 +55,12 @@ class _TodoDetailState extends State<TodoDetail> {
   void _editTodo() {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-          builder: (context) => EditTodo(
-              onTodoEdited: (Todo edited) => setState(() {
+          builder: (context) => EditTodo(true,
+              (Todo edited) => setState(() {
                     todo = edited;
                     onTodoChanged();
                   }),
-              todo: todo)
-      ),
+              todo: todo)),
     );
   }
 }

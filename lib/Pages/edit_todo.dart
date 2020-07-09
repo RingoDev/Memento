@@ -1,38 +1,38 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_material_color_picker/flutter_material_color_picker.dart';
 import 'package:todo/Data/todo.dart';
+import 'package:flutter_material_color_picker/flutter_material_color_picker.dart';
 import 'package:todo/main.dart';
 
 class EditTodo extends StatefulWidget {
-  final void Function(Todo edited) onTodoEdited;
+  final void Function(Todo edited) onTodoAdded;
+  final bool edit;
   final Todo todo;
 
-
-  EditTodo({this.onTodoEdited, this.todo});
+  EditTodo(this.edit, this.onTodoAdded, {this.todo});
 
   @override
-  _EditTodoState createState() => _EditTodoState(this.onTodoEdited, this.todo);
+  _EditTodoState createState() =>
+      _EditTodoState(this.edit, this.onTodoAdded, todo: this.todo);
 }
 
 class _EditTodoState extends State<EditTodo> {
-  /// callback to signal the change of the To\do
-  final void Function(Todo edited) onTodoEdited;
-  /// the unedited To\do
-  final Todo todo;
-  /// the edited To\do
+  Todo todo;
   Todo editedTodo;
-  Color _tempSelectedColor = MyApp.model.color;
+  Color _tempSelectedColor = Color(0xffffffff);
 
-  _EditTodoState(this.onTodoEdited, this.todo) {
-    editedTodo = this.todo.copy();
-    print('edited Todo: ' + editedTodo.toString());
+  final void Function(Todo edited) onTodoAdded;
+  final bool edit;
+
+  _EditTodoState(this.edit, this.onTodoAdded, {Todo todo}) {
+    this.todo = todo ?? Todo();
+    this.editedTodo = this.todo.copy();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text('Edit this TODO'),
+          title: Text(!edit ? 'Create a new TODO' : 'Edit a TODO'),
         ),
         body: Container(
           padding: EdgeInsets.all(16.0),
@@ -44,34 +44,67 @@ class _EditTodoState extends State<EditTodo> {
     return Form(
       child: Column(
         children: <Widget>[
-          Text('Edit the Name'),
+          Text('Enter a Name'),
           TextFormField(
-              maxLength: 60, initialValue: todo.name, onChanged: _selectName),
-          Text('Edit the Description'),
+              maxLength: 60,
+              onChanged: _selectName,
+              initialValue: editedTodo.name),
+          Text('Enter a Description'),
           TextFormField(
-            initialValue: todo.description,
+            initialValue: editedTodo.description,
             keyboardType: TextInputType.multiline,
             maxLines: null,
             onChanged: _selectDescription,
           ),
           SizedBox(height: 10),
-          Text('DueDate'),
           Row(
-              children: _createDateRow(),
-              mainAxisAlignment: MainAxisAlignment.center),
-          Text('DueTime'),
-          Row(
-              children: _createTimeRow(),
-              mainAxisAlignment: MainAxisAlignment.center),
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: <Widget>[
+              Column(
+                children: <Widget>[
+                  Text('DueDate'),
+                  Row(children: <Widget>[
+                    Text(Todo.formatDate(editedTodo.deadline),
+                        style: TextStyle(fontSize: 18.0))
+                  ], mainAxisAlignment: MainAxisAlignment.center),
+                  IconButton(
+                    icon: Icon(Icons.event),
+                    onPressed: () {
+                      _selectDate(context);
+                    },
+                  )
+                ],
+              ),
+              Column(
+                children: <Widget>[
+                  Text('DueTime'),
+                  Row(children: <Widget>[
+                    Text(
+                        TimeOfDay.fromDateTime(editedTodo.deadline)
+                            .format(context),
+                        style: TextStyle(fontSize: 18.0))
+                  ], mainAxisAlignment: MainAxisAlignment.center),
+                  IconButton(
+                    icon: Icon(Icons.schedule),
+                    onPressed: () {
+                      _selectTime(context);
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
           Text('Color'),
           FlatButton(
             color: editedTodo.color,
-            onPressed: () => _openColorPicker(), child: null,
+            onPressed: () => _openColorPicker(),
+            child: null,
           ),
           RaisedButton(
             onPressed: () {
-              _editTodo(context);
-              // callback to parent widget
+              _saveTodo(context);
+              // callback to parent widget to set state
+              onTodoAdded(editedTodo);
             },
             child: Text('Save TODO', style: TextStyle(fontSize: 20)),
           ),
@@ -94,67 +127,42 @@ class _EditTodoState extends State<EditTodo> {
       });
   }
 
-  void _editTodo(context) {
-
-    MyApp.model.edit(todo,editedTodo);
+  void _saveTodo(context) {
+    if (edit) {
+      MyApp.model.edit(todo, editedTodo);
+    } else {
+      MyApp.model.add(editedTodo);
+    }
 
     /// returning to previous page
     Navigator.of(context).pop();
-
-    /// callback to previous page to set state
-    onTodoEdited(editedTodo);
   }
 
   Future<Null> _selectTime(BuildContext context) async {
     final TimeOfDay picked = await showTimePicker(
       context: context,
-      initialTime: editedTodo.dueTime,
+      initialTime: TimeOfDay.fromDateTime(editedTodo.deadline),
     );
-    if (picked != null && picked != editedTodo.dueTime)
+    if (picked != null && picked != TimeOfDay.fromDateTime(editedTodo.deadline))
       setState(() {
-        editedTodo.dueTime = picked;
+        editedTodo.setTime(picked);
       });
-  }
-
-  List<Widget> _createTimeRow() {
-    return <Widget>[
-      Text(editedTodo.dueTime.format(context),
-          style: TextStyle(fontSize: 18.0)),
-      IconButton(
-        icon: Icon(Icons.alarm),
-        onPressed: () {
-          _selectTime(context);
-        },
-      )
-    ];
   }
 
   Future<Null> _selectDate(BuildContext context) async {
     final DateTime picked = await showDatePicker(
         context: context,
-        initialDate: editedTodo.dueDate,
+        initialDate: editedTodo.deadline,
         firstDate: DateTime(2015, 8),
         lastDate: DateTime(2101));
-    if (picked != null && picked != editedTodo.dueDate)
+    if (picked != null && picked != editedTodo.deadline) {
       setState(() {
-        editedTodo.dueDate = picked;
+        editedTodo.setDate(picked);
       });
+    }
   }
 
-  List<Widget> _createDateRow() {
-    return <Widget>[
-      Text(Todo.formatDate(editedTodo.dueDate),
-          style: TextStyle(fontSize: 18.0)),
-      IconButton(
-        icon: Icon(Icons.calendar_today),
-        onPressed: () {
-          _selectDate(context);
-        },
-      )
-    ];
-  }
-
-  void _openColorPicker(){
+  void _openColorPicker() {
     showDialog(
       context: context,
       builder: (builder) {
@@ -163,7 +171,8 @@ class _EditTodoState extends State<EditTodo> {
           title: Text('Choose a Color'),
           content: MaterialColorPicker(
             selectedColor: _tempSelectedColor,
-            onColorChange: (color) => setState(() => _tempSelectedColor = color),
+            onColorChange: (color) =>
+                setState(() => _tempSelectedColor = color),
           ),
           actions: [
             FlatButton(
