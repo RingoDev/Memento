@@ -2,16 +2,21 @@ import 'package:sqflite/sqflite.dart';
 import 'dart:async';
 import 'package:path/path.dart';
 import 'package:todo/Data/todo.dart';
+import 'package:todo/Data/todo_list.dart';
 
 class DBController {
-  static final _databaseName = "todolist.db";
-  static final table = 'todos';
+  static final _databaseName = "todoapp.db";
+  static final todoListTable = 'todoLists';
 
   static final columnId = '_id';
   static final columnName = 'name';
   static final columnDescription = 'description';
-  static final columnDeadline = 'deadline';
   static final columnColor = 'color';
+
+  static final todoTable = 'todos';
+
+  static final todoColumnListId = 'list_id';
+  static final todoColumnDeadline = 'deadline';
 
   // make this a singleton class
   DBController._privateConstructor();
@@ -31,18 +36,27 @@ class DBController {
   // this opens the database (and creates it if it doesn't exist)
   _initDatabase() async {
     return await openDatabase(join(await getDatabasesPath(), _databaseName),
-        version: 5, onCreate: _onCreate, onUpgrade: _onUpgrade);
+        version: 1, onCreate: _onCreate, onUpgrade: _onUpgrade);
   }
 
   // SQL code to create the database table
   Future _onCreate(Database db, int version) async {
     print('created db');
     await db.execute('''
-          CREATE TABLE $table (
+          CREATE TABLE $todoListTable (
             $columnId INTEGER PRIMARY KEY,
             $columnName TEXT NOT NULL,
             $columnDescription TEXT,
-            $columnDeadline TEXT NOT NULL,
+            $columnColor TEXT NOT NULL
+          )
+          ''');
+    await db.execute('''
+          CREATE TABLE $todoTable (
+            $columnId INTEGER PRIMARY KEY,
+            $todoColumnListId INTEGER NOT NULL,
+            $columnName TEXT NOT NULL,
+            $columnDescription TEXT,
+            $todoColumnDeadline TEXT NOT NULL,
             $columnColor TEXT NOT NULL
           )
           ''');
@@ -50,61 +64,62 @@ class DBController {
 
   Future _onUpgrade(Database db, int oldVersion, int newVersion) async {
     print('upgraded db');
-    await db.execute('DROP TABLE IF EXISTS ' + table);
+    await db.execute('DROP TABLE IF EXISTS ' + todoListTable);
+    await db.execute('DROP TABLE IF EXISTS ' + todoTable);
     await db.execute('''
-          CREATE TABLE $table (
+          CREATE TABLE $todoListTable (
             $columnId INTEGER PRIMARY KEY,
             $columnName TEXT NOT NULL,
             $columnDescription TEXT,
-            $columnDeadline TEXT NOT NULL,
+            $columnColor TEXT NOT NULL
+          )
+          ''');
+    await db.execute('''
+          CREATE TABLE $todoTable (
+            $columnId INTEGER PRIMARY KEY,
+            $todoColumnListId INTEGER NOT NULL,
+            $columnName TEXT NOT NULL,
+            $columnDescription TEXT,
+            $todoColumnDeadline TEXT NOT NULL,
             $columnColor TEXT NOT NULL
           )
           ''');
   }
 
-  // Helper methods
-
-  // Inserts a row in the database where each key in the Map is a column name
-  // and the value is the column value. The return value is the id of the
-  // inserted row.
-  Future<int> insert(Map<String, dynamic> row) async {
-    Database db = await instance.database;
-    return await db.insert(table, row);
-  }
-
-  // All of the rows are returned as a list of maps, where each map is
-  // a key-value list of columns.
-  Future<List<Map<String, dynamic>>> queryAllRows() async {
-    Database db = await instance.database;
-    return await db.query(table);
-  }
-
-  // All of the methods (insert, query, update, delete) can also be done using
-  // raw SQL commands. This method uses a raw query to give the row count.
-  Future<int> queryRowCount() async {
-    Database db = await instance.database;
-    return Sqflite.firstIntValue(
-        await db.rawQuery('SELECT COUNT(*) FROM $table'));
-  }
-
-  // We are assuming here that the id column in the map is set. The other
-  // column values will be used to update the row.
-  Future<int> update(Map<String, dynamic> row) async {
-    Database db = await instance.database;
-    int id = row[columnId];
-    return await db.update(table, row, where: '$columnId = ?', whereArgs: [id]);
-  }
-
   // Deletes the row specified by the id. The number of affected rows is
   // returned. This should be 1 as long as the row exists.
-  Future<int> delete(int id) async {
+  Future<int> deleteTodo(int id) async {
     Database db = await instance.database;
-    return await db.delete(table, where: '$columnId = ?', whereArgs: [id]);
+    return await db.delete(todoTable, where: '$columnId = ?', whereArgs: [id]);
   }
 
-  Future<int> deleteAll() async {
+  Future<int> deleteTodoList(int id) async {
     Database db = await instance.database;
-    return await db.delete(table);
+    return await db
+        .delete(todoListTable, where: '$columnId = ?', whereArgs: [id]);
+  }
+
+  Future<int> deleteAllTodos() async {
+    Database db = await instance.database;
+    return await db.delete(todoTable);
+  }
+
+  Future<int> deleteAllTodoLists() async {
+    Database db = await instance.database;
+    return await db.delete(todoListTable);
+  }
+
+  Future<int> insertTodoList(TodoList todoList) async {
+    Map map = Map<String, dynamic>();
+    map.putIfAbsent(columnName, () => todoList.name);
+    map.putIfAbsent(columnDescription, () => todoList.description);
+    map.putIfAbsent(columnColor, () => Todo.toARGBString(todoList.color));
+    if (todoList.id != -1)
+      map.putIfAbsent(columnId, () => todoList.id);
+    else
+      print('ID WAS -1 !!!');
+    Database db = await instance.database;
+    return await db.insert(todoListTable, map);
   }
 
   /// inserts a To\do into the SQLite Database
@@ -112,33 +127,66 @@ class DBController {
     Map map = Map<String, dynamic>();
     map.putIfAbsent(columnName, () => todo.name);
     map.putIfAbsent(columnDescription, () => todo.description);
-    map.putIfAbsent(columnDeadline, () => todo.deadline.toIso8601String());
+    map.putIfAbsent(todoColumnDeadline, () => todo.deadline.toIso8601String());
     map.putIfAbsent(columnColor, () => Todo.toARGBString(todo.color));
+    map.putIfAbsent(todoColumnListId, () => todo.listID);
     if (todo.id != -1)
       map.putIfAbsent(columnId, () => todo.id);
     else
       print('ID WAS -1 !!!');
-    return await insert(map);
+    Database db = await instance.database;
+    return await db.insert(todoTable, map);
   }
 
   /// queries the SQLite Database for all the saved Todos and returns them as a Map<ID,To\do>
   Future<Map<int, Todo>> queryTodos() async {
     Map<int, Todo> result = Map();
-    List<Map<String, dynamic>> mapList = await queryAllRows();
+    Database db = await instance.database;
+    List<Map<String, dynamic>> mapList = await db.query(todoTable);
     for (Map map in mapList) {
       result.putIfAbsent(map[columnId], () => mapToTodo(map));
     }
     return result;
   }
 
+  /// queries the SQLite Database for all the saved TodoLists and returns them as a Map<ID,To\doList>
+  Future<Map<int, TodoList>> queryTodoLists() async {
+    Map<int, TodoList> result = Map();
+    Database db = await instance.database;
+    List<Map<String, dynamic>> mapList = await db.query(todoListTable);
+    for (Map map in mapList) {
+      result.putIfAbsent(map[columnId], () => mapToTodoList(map));
+    }
+    return result;
+  }
+
   /// transforms a query ResultMap to a To\do
   static Todo mapToTodo(Map<String, dynamic> map) {
-    Todo todo = new Todo(
+    return Todo(
         name: map[columnName],
         description: map[columnDescription],
-        deadline: DateTime.parse(map[columnDeadline]),
+        deadline: DateTime.parse(map[todoColumnDeadline]),
+        id: map[columnId],
+        listID: map[todoColumnListId],
+        color: Todo.fromARGBString(map[columnColor]));
+  }
+
+  /// transforms a query ResultMap to a To\doList
+  static TodoList mapToTodoList(Map<String, dynamic> map) {
+    return TodoList(
+        name: map[columnName],
+        description: map[columnDescription],
         id: map[columnId],
         color: Todo.fromARGBString(map[columnColor]));
-    return todo;
+  }
+
+  /// returns the filled TodoLists in a map
+  Future<Map<int, TodoList>> queryAll() async {
+    Map<int, TodoList> todoLists = await queryTodoLists();
+    Map<int, Todo> todos = await queryTodos();
+    todos.forEach((id, todo) {
+      todoLists[todo.listID].map.putIfAbsent(todo.id, () => todo);
+    });
+    return todoLists;
   }
 }

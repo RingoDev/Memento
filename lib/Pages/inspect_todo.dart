@@ -1,24 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:todo/Data/todo.dart';
+import 'package:todo/Data/todo_list.dart';
 import 'edit_todo.dart';
 
 class TodoDetail extends StatefulWidget {
   final VoidCallback onTodoChanged;
   final Todo todo;
+  final TodoList todoList;
 
-  TodoDetail(this.onTodoChanged, this.todo);
+  TodoDetail(this.onTodoChanged, this.todo,this.todoList);
 
   @override
   _TodoDetailState createState() =>
-      _TodoDetailState(this.onTodoChanged, this.todo);
+      _TodoDetailState(this.onTodoChanged, this.todo,this.todoList);
 }
 
 class _TodoDetailState extends State<TodoDetail> {
   final _biggerFont = TextStyle(fontSize: 18.0);
   Todo todo;
+  final TodoList todoList;
   final VoidCallback onTodoChanged;
 
-  _TodoDetailState(this.onTodoChanged, this.todo);
+  _TodoDetailState(this.onTodoChanged, this.todo,this.todoList);
 
   @override
   Widget build(BuildContext context) {
@@ -59,7 +62,7 @@ class _TodoDetailState extends State<TodoDetail> {
               (Todo edited) => setState(() {
                     todo = edited;
                     onTodoChanged();
-                  }),
+                  }),todoList,
               todo: todo)),
     );
   }

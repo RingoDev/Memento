@@ -1,20 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:todo/Data/todo_list.dart';
 import 'package:todo/Pages/inspect_todo.dart';
 import 'package:todo/main.dart';
 import '../Data/todo.dart';
 import 'edit_todo.dart';
 
-class TodoList extends StatefulWidget {
-  TodoList();
+class TodoListView extends StatefulWidget {
+  VoidCallback onChange;
+  TodoList todoList;
+  TodoListView(this.onChange,this.todoList);
 
   @override
-  _TodoListState createState() => _TodoListState();
+  _TodoListViewState createState() => _TodoListViewState(this.onChange,this.todoList);
 }
 
-class _TodoListState extends State<TodoList> {
+class _TodoListViewState extends State<TodoListView> {
   final _biggerFont = TextStyle(fontSize: 18.0);
+  VoidCallback onChange;
+  TodoList todoList;
 
-  _TodoListState();
+  _TodoListViewState(this.onChange,this.todoList);
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +37,7 @@ class _TodoListState extends State<TodoList> {
                     builder: (context) => EditTodo(
                         false,
                         (Todo added) =>
-                            {setState(() {}), pushDetailPage(added)})),
+                            {setState(() {}), pushDetailPage(added)},this.todoList)),
               );
             },
             icon: Icon(Icons.add),
@@ -51,12 +56,12 @@ class _TodoListState extends State<TodoList> {
   void pushDetailPage(Todo toInspect) {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-          builder: (context) => TodoDetail(() => setState(() {}), toInspect)),
+          builder: (context) => TodoDetail(() => setState(() {}), toInspect,this.todoList)),
     );
   }
 
   Widget _buildTodos() {
-    final tiles = MyApp.model.todoList.map(
+    final tiles = todoList.todos.map(
       (Todo todo) {
         return Ink(
             color: todo.color,
@@ -67,7 +72,7 @@ class _TodoListState extends State<TodoList> {
                 ),
                 onTap: () => {pushDetailPage(todo)},
                 onLongPress: () =>
-                    {MyApp.model.remove(todo), setState(() {})}));
+                    {todoList.remove(todo), setState(() {})}));
       },
     );
     final divided = ListTile.divideTiles(

@@ -1,19 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:todo/Data/todo.dart';
+import 'package:todo/Data/todo_list.dart';
 import 'package:todo/Database/db_controller.dart';
 
 /// holds Data and Settings of this App Instance
 class Model {
-  Map<int, Todo> map;
+
+  Map<int, TodoList> map;
   Color color = Color(0xffffffff);
 
-  /// the TodoList sorted by dueDate
-  List<Todo> get todoList {
-    List<Todo> list = map.values.toList();
+  List<TodoList> get todoLists{
+    List<TodoList> list = map.values.toList();
     list.sort((a, b) {
       return a.deadline.compareTo(b.deadline);
     });
     return list;
+  }
+
+  TodoList getList(Todo todo){
+    return map[todo.listID];
   }
 
   Model(this.map, {this.color});
@@ -31,33 +36,35 @@ class Model {
 
   /// to make sure DB and model are always at the same state only use these access methods.
 
-  void add(Todo todo) {
-    todo.id = nextID;
+  void add(TodoList todoList) {
+    todoList.id = nextID;
 
     /// add to model
-    map.putIfAbsent(todo.id, () => todo);
+    map.putIfAbsent(todoList.id, () => todoList);
 
     /// add to DB
-    DBController.instance.insertTodo(todo);
+    DBController.instance.insertTodoList(todoList);
   }
 
-  void remove(Todo todo) {
+  void remove(TodoList todoList) {
     /// remove from model
-    map.remove(todo.id);
+    map.remove(todoList.id);
 
     /// remove from DB
-    DBController.instance.delete(todo.id);
+    DBController.instance.deleteTodoList(todoList.id);
   }
 
-  void edit(Todo old, Todo edited) {
+  void edit(TodoList old, TodoList edited) {
+
+    edited.id = old.id;
+
     /// editing in model
     map.remove(old.id);
     map.putIfAbsent(edited.id, () => edited);
 
     /// editing in DB
-    DBController.instance.delete(old.id);
-    edited.id = old.id;
-    DBController.instance.insertTodo(edited);
+    DBController.instance.deleteTodoList(old.id);
+    DBController.instance.insertTodoList(edited);
   }
 
   void removeAll() {
@@ -65,6 +72,6 @@ class Model {
     map.clear();
 
     /// remove All from DB
-    DBController.instance.deleteAll();
+    DBController.instance.deleteAllTodoLists();
   }
 }

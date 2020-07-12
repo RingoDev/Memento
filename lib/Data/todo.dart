@@ -8,9 +8,11 @@ class Todo {
   DateTime madeDate;
   TimeOfDay madeTime;
   DateTime deadline;
+  int listID;
 
   Todo(
       {Color color,
+      this.listID = -1,
       this.id = -1,
       this.name = "",
       this.description = "",
@@ -34,7 +36,9 @@ class Todo {
 
   @override
   String toString() {
-    return '\nid: ' +
+    return '\nListID: ' +
+        this.listID.toString() +
+        '\nid: ' +
         id.toString() +
         '\nname: ' +
         name +

@@ -1,29 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:todo/Data/todo.dart';
 import 'package:flutter_material_color_picker/flutter_material_color_picker.dart';
-import 'package:todo/main.dart';
+import 'package:todo/Data/todo_list.dart';
+
 
 class EditTodo extends StatefulWidget {
   final void Function(Todo edited) onTodoAdded;
   final bool edit;
   final Todo todo;
+  final TodoList todoList;
 
-  EditTodo(this.edit, this.onTodoAdded, {this.todo});
+  EditTodo(this.edit, this.onTodoAdded,this.todoList, {this.todo});
 
   @override
   _EditTodoState createState() =>
-      _EditTodoState(this.edit, this.onTodoAdded, todo: this.todo);
+      _EditTodoState(this.edit, this.onTodoAdded,this.todoList, todo: this.todo);
 }
 
 class _EditTodoState extends State<EditTodo> {
   Todo todo;
   Todo editedTodo;
   Color _tempSelectedColor = Color(0xffffffff);
+  TodoList todoList;
 
   final void Function(Todo edited) onTodoAdded;
   final bool edit;
 
-  _EditTodoState(this.edit, this.onTodoAdded, {Todo todo}) {
+  _EditTodoState(this.edit, this.onTodoAdded, this.todoList,{Todo todo}) {
     this.todo = todo ?? Todo();
     this.editedTodo = this.todo.copy();
   }
@@ -129,9 +132,9 @@ class _EditTodoState extends State<EditTodo> {
 
   void _saveTodo(context) {
     if (edit) {
-      MyApp.model.edit(todo, editedTodo);
+      todoList.edit(todo, editedTodo);
     } else {
-      MyApp.model.add(editedTodo);
+      todoList.add(editedTodo);
     }
 
     /// returning to previous page
