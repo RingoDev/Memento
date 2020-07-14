@@ -8,6 +8,8 @@ class Model {
   Map<int, TodoList> map;
   Color color = Color(0xffffffff);
 
+
+  /// returns a List of TodoLists sorted by Deadline
   List<TodoList> get todoLists {
     List<TodoList> list = map.values.toList();
     list.sort((a, b) {

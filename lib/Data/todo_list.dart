@@ -10,6 +10,7 @@ class TodoList {
   String description;
   Color color;
   int id;
+  bool detailed;
 
   TodoList({
     Map map,
@@ -17,6 +18,7 @@ class TodoList {
     this.id = -1,
     this.name = "",
     this.description = "",
+    this.detailed = false
   }) {
     this.color = color ?? Color(0xffffffff);
     this.map = map ?? Map();

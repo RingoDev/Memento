@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:todo/Data/todo_list.dart';
+import 'package:todo/main.dart';
 
 class Todo {
   Color color;
@@ -27,6 +29,10 @@ class Todo {
   void setTime(TimeOfDay time) {
     this.deadline = DateTime(
         deadline.year, deadline.month, deadline.day, time.hour, time.minute);
+  }
+
+  TodoList get todoList{
+    return MyApp.model.map[this.listID];
   }
 
   void setDate(DateTime date) {
