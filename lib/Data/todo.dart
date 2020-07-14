@@ -78,7 +78,6 @@ class Todo {
 
   /// converts a Color to an ARGB String with the Format: (255,255,255,255)
   static String toARGBString(Color color) {
-    print('haha');
     return '(' +
         color.alpha.toString() +
         ',' +

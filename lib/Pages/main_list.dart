@@ -6,7 +6,6 @@ import 'package:todo/Pages/todo_list_view.dart';
 import 'package:todo/main.dart';
 import '../Data/todo.dart';
 
-
 class MainPage extends StatefulWidget {
   MainPage();
 
@@ -25,6 +24,7 @@ class _MainPageState extends State<MainPage> {
         appBar: AppBar(title: Text('All TodoLists'), actions: [
           IconButton(
               onPressed: () {
+                print(MyApp.model.nextTodoID);
                 setState(() {});
               },
               icon: Icon(Icons.refresh)),
@@ -34,8 +34,8 @@ class _MainPageState extends State<MainPage> {
                 MaterialPageRoute<void>(
                     builder: (context) => EditTodoList(
                         false,
-                            (TodoList added) =>
-                        {setState(() {}), pushTodoList(added)})),
+                        (TodoList added) =>
+                            {setState(() {}), pushTodoList(added)})),
               );
             },
             icon: Icon(Icons.add),
@@ -54,23 +54,36 @@ class _MainPageState extends State<MainPage> {
   void pushTodoList(TodoList toInspect) {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-          builder: (context) => TodoListView(() => setState(() {}), toInspect)),
+          builder: (context) => TodoListView(
+              () => {
+                    setState(() {}),
+                  },
+              toInspect)),
     );
   }
 
   Widget _buildTodoLists() {
     final tiles = MyApp.model.todoLists.map(
-          (TodoList todoList) {
+      (TodoList todoList) {
         return Ink(
             color: todoList.color,
-            child: ListTile(
-                title: Text(
-                  todoList.name + '  ' + Todo.formatDate(todoList.deadline),
-                  style: _biggerFont,
-                ),
-                onTap: () => {pushTodoList(todoList)},
-                onLongPress: () =>
-                {MyApp.model.remove(todoList), setState(() {})}));
+            child: GestureDetector(
+              onHorizontalDragUpdate: (details) {
+                if (details.delta.dx > 10) {
+                  print('made a right swipe');
+                } else if (details.delta.dx < -10) {
+                  print('made a left swipe');
+                }
+              },
+              child: ListTile(
+                  title: Text(
+                    formatTileText(todoList),
+                    style: _biggerFont,
+                  ),
+                  onTap: () => {pushTodoList(todoList)},
+                  onLongPress: () =>
+                      {MyApp.model.remove(todoList), setState(() {})}),
+            ));
       },
     );
 
@@ -79,5 +92,12 @@ class _MainPageState extends State<MainPage> {
       tiles: tiles,
     ).toList();
     return ListView(children: divided);
+  }
+
+  static String formatTileText(TodoList todoList) {
+    String str = todoList.name;
+    str += '   ';
+    if (todoList.hasDeadline) str += Todo.formatDate(todoList.deadline);
+    return str;
   }
 }

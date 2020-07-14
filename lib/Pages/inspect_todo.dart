@@ -8,11 +8,11 @@ class TodoDetail extends StatefulWidget {
   final Todo todo;
   final TodoList todoList;
 
-  TodoDetail(this.onTodoChanged, this.todo,this.todoList);
+  TodoDetail(this.onTodoChanged, this.todo, this.todoList);
 
   @override
   _TodoDetailState createState() =>
-      _TodoDetailState(this.onTodoChanged, this.todo,this.todoList);
+      _TodoDetailState(this.onTodoChanged, this.todo, this.todoList);
 }
 
 class _TodoDetailState extends State<TodoDetail> {
@@ -21,7 +21,7 @@ class _TodoDetailState extends State<TodoDetail> {
   final TodoList todoList;
   final VoidCallback onTodoChanged;
 
-  _TodoDetailState(this.onTodoChanged, this.todo,this.todoList);
+  _TodoDetailState(this.onTodoChanged, this.todo, this.todoList);
 
   @override
   Widget build(BuildContext context) {
@@ -58,12 +58,17 @@ class _TodoDetailState extends State<TodoDetail> {
   void _editTodo() {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-          builder: (context) => EditTodo(true,
-              (Todo edited) => setState(() {
-                    todo = edited;
-                    onTodoChanged();
-                  }),todoList,
+          builder: (context) => EditTodo(
+              true, (Todo edited) => update(edited), todoList,
               todo: todo)),
     );
+  }
+
+  /// updates the state and passes change on to parent class
+  void update(Todo todo) {
+    setState(() {
+      this.todo = todo;
+    });
+    onTodoChanged();
   }
 }

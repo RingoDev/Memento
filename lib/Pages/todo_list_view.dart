@@ -6,8 +6,8 @@ import '../Data/todo.dart';
 import 'edit_todo.dart';
 
 class TodoListView extends StatefulWidget {
-  VoidCallback onChange;
-  TodoList todoList;
+  final VoidCallback onChange;
+  final TodoList todoList;
   TodoListView(this.onChange,this.todoList);
 
   @override
@@ -24,7 +24,7 @@ class _TodoListViewState extends State<TodoListView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: Text('TodoList'), actions: [
+        appBar: AppBar(title: Text(todoList.name), actions: [
           IconButton(
               onPressed: () {
                 setState(() {});
@@ -37,7 +37,7 @@ class _TodoListViewState extends State<TodoListView> {
                     builder: (context) => EditTodo(
                         false,
                         (Todo added) =>
-                            {setState(() {}), pushDetailPage(added)},this.todoList)),
+                            {setState(() {}),onChange(),print('added Todo (Callback in parent class)'), pushDetailPage(added)},this.todoList)),
               );
             },
             icon: Icon(Icons.add),
@@ -56,8 +56,14 @@ class _TodoListViewState extends State<TodoListView> {
   void pushDetailPage(Todo toInspect) {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-          builder: (context) => TodoDetail(() => setState(() {}), toInspect,this.todoList)),
+          builder: (context) => TodoDetail(() => update(), toInspect,this.todoList)),
     );
+  }
+
+  /// updates this state and passes change on to parent class
+  void update(){
+    setState(() {});
+    onChange();
   }
 
   Widget _buildTodos() {

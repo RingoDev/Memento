@@ -5,11 +5,10 @@ import 'package:todo/Database/db_controller.dart';
 
 /// holds Data and Settings of this App Instance
 class Model {
-
   Map<int, TodoList> map;
   Color color = Color(0xffffffff);
 
-  List<TodoList> get todoLists{
+  List<TodoList> get todoLists {
     List<TodoList> list = map.values.toList();
     list.sort((a, b) {
       return a.deadline.compareTo(b.deadline);
@@ -17,14 +16,14 @@ class Model {
     return list;
   }
 
-  TodoList getList(Todo todo){
+  TodoList getList(Todo todo) {
     return map[todo.listID];
   }
 
   Model(this.map, {this.color});
 
-  /// returns the next free ID in the TodoList
-  int get nextID {
+  /// returns the next free ListID in the model
+  int get nextListID {
     int i = 1;
     while (true) {
       if (!map.containsKey(i))
@@ -34,10 +33,26 @@ class Model {
     }
   }
 
+  int get nextTodoID {
+    bool found = false;
+    int i = 1;
+    while (!found) {
+      found = true;
+      for (TodoList todoList in map.values.toList()) {
+        if (todoList.map.containsKey(i)) {
+          i++;
+          found = false;
+          break;
+        }
+      }
+    }
+    return i;
+  }
+
   /// to make sure DB and model are always at the same state only use these access methods.
 
   void add(TodoList todoList) {
-    todoList.id = nextID;
+    todoList.id = nextListID;
 
     /// add to model
     map.putIfAbsent(todoList.id, () => todoList);
@@ -55,7 +70,6 @@ class Model {
   }
 
   void edit(TodoList old, TodoList edited) {
-
     edited.id = old.id;
 
     /// editing in model
@@ -72,6 +86,6 @@ class Model {
     map.clear();
 
     /// remove All from DB
-    DBController.instance.deleteAllTodoLists();
+    DBController.instance.deleteAll();
   }
 }

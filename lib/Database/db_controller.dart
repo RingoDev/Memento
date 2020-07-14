@@ -109,6 +109,12 @@ class DBController {
     return await db.delete(todoListTable);
   }
 
+  Future<int> deleteAll() async{
+    Database db = await instance.database;
+    await db.delete(todoListTable);
+    return await db.delete(todoTable);
+  }
+
   Future<int> insertTodoList(TodoList todoList) async {
     Map map = Map<String, dynamic>();
     map.putIfAbsent(columnName, () => todoList.name);
@@ -155,6 +161,7 @@ class DBController {
     Database db = await instance.database;
     List<Map<String, dynamic>> mapList = await db.query(todoListTable);
     for (Map map in mapList) {
+
       result.putIfAbsent(map[columnId], () => mapToTodoList(map));
     }
     return result;
@@ -185,6 +192,7 @@ class DBController {
     Map<int, TodoList> todoLists = await queryTodoLists();
     Map<int, Todo> todos = await queryTodos();
     todos.forEach((id, todo) {
+      if (todoLists[todo.listID] == null)print('TODOLIST DOESNT EXIST');
       todoLists[todo.listID].map.putIfAbsent(todo.id, () => todo);
     });
     return todoLists;

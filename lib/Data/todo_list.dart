@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:todo/Data/todo.dart';
 import 'package:todo/Database/db_controller.dart';
+import 'package:todo/main.dart';
 
 class TodoList {
   Map<int, Todo> map;
@@ -17,9 +18,9 @@ class TodoList {
     this.name = "",
     this.description = "",
   }) {
-   this.color = color ?? Color(0xffffffff);
-   this.map = map ?? Map();
-}
+    this.color = color ?? Color(0xffffffff);
+    this.map = map ?? Map();
+  }
 
   TodoList copy() {
     return TodoList(
@@ -30,9 +31,15 @@ class TodoList {
         color: this.color);
   }
 
+  bool get hasDeadline{
+    if(this.deadline == DateTime(3000))return false;
+    else return true;
+  }
+
   @override
   String toString() {
-    return '\nPRINTING TODOLIST' + '\nid: ' +
+    String str = '\nPRINTING TODOLIST' +
+        '\nid: ' +
         id.toString() +
         '\nname: ' +
         name +
@@ -42,6 +49,10 @@ class TodoList {
         color.toString() +
         '\nDeadline: ' +
         deadline.toIso8601String();
+    map.forEach((key, value) {
+      str += value.toString();
+    });
+    return str;
   }
 
   /// the TodoList sorted by dueDate
@@ -63,20 +74,9 @@ class TodoList {
     return result;
   }
 
-  /// returns the next free ID in the TodoList
-  int get nextID {
-    int i = 1;
-    while (true) {
-      if (!map.containsKey(i))
-        return i;
-      else
-        i++;
-    }
-  }
-
   /// adds To\do to the TodoList and to the DB
   void add(Todo todo) {
-    todo.id = nextID;
+    todo.id = MyApp.model.nextTodoID;
     todo.listID = this.id;
 
     /// add to todoList

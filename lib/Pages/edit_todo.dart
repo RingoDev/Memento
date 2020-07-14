@@ -29,6 +29,8 @@ class _EditTodoState extends State<EditTodo> {
   _EditTodoState(this.edit, this.onTodoAdded, this.todoList,{Todo todo}) {
     this.todo = todo ?? Todo();
     this.editedTodo = this.todo.copy();
+    // if its a newly added To\do use the list color as to\do color
+    if(!edit) this.editedTodo.color = this.todoList.color;
   }
 
   @override
