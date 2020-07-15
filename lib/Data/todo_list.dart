@@ -1,3 +1,4 @@
+
 import 'dart:ui';
 
 import 'package:todo/Data/todo.dart';
@@ -33,6 +34,14 @@ class TodoList {
         color: this.color);
   }
 
+
+  List<Todo> get openTodos{
+    List<Todo> list = List();
+    for (Todo todo in this.todos){
+      if(!todo.isDone)list.add(todo);
+    }
+    return list;
+  }
   bool get hasDeadline{
     if(this.deadline == DateTime(3000))return false;
     else return true;
@@ -66,9 +75,16 @@ class TodoList {
     return list;
   }
 
+  bool get allDone{
+    for (Todo todo in map.values){
+      if (!todo.isDone) return false;
+    }
+    return true;
+  }
+
   DateTime get deadline {
     DateTime result = DateTime(3000);
-    for (Todo todo in map.values) {
+    for (Todo todo in openTodos) {
       if (todo.deadline.isBefore(result)) {
         result = todo.deadline;
       }

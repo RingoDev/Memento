@@ -17,6 +17,7 @@ class DBController {
 
   static final todoColumnListId = 'list_id';
   static final todoColumnDeadline = 'deadline';
+  static final todoColumnIsDone = 'done';
 
   // make this a singleton class
   DBController._privateConstructor();
@@ -57,7 +58,8 @@ class DBController {
             $columnName TEXT NOT NULL,
             $columnDescription TEXT,
             $todoColumnDeadline TEXT NOT NULL,
-            $columnColor TEXT NOT NULL
+            $columnColor TEXT NOT NULL,
+            $todoColumnIsDone INTEGER NOT NULL
           )
           ''');
   }
@@ -93,10 +95,23 @@ class DBController {
     return await db.delete(todoTable, where: '$columnId = ?', whereArgs: [id]);
   }
 
+  Future<void> toggleTodoState(int id, bool done) async {
+    Database db = await instance.database;
+    Map<String, dynamic> map = Map();
+    map.putIfAbsent(todoColumnIsDone, () => done ? 1 : 0);
+    await db.update(todoTable, map, where: '$columnId = ?', whereArgs: [id]);
+  }
+  /// deletes only the List not the Todos in DB
   Future<int> deleteTodoList(int id) async {
     Database db = await instance.database;
     return await db
         .delete(todoListTable, where: '$columnId = ?', whereArgs: [id]);
+  }
+
+  Future<void> deleteFullTodoList(int ListID) async {
+    Database db = await instance.database;
+    await db.delete(todoListTable, where: '$columnId = ?', whereArgs: [ListID]);
+    await db.delete(todoTable, where: '$todoColumnListId = ?', whereArgs: [ListID]);
   }
 
   Future<int> deleteAllTodos() async {
@@ -109,7 +124,7 @@ class DBController {
     return await db.delete(todoListTable);
   }
 
-  Future<int> deleteAll() async{
+  Future<int> deleteAll() async {
     Database db = await instance.database;
     await db.delete(todoListTable);
     return await db.delete(todoTable);
@@ -136,6 +151,7 @@ class DBController {
     map.putIfAbsent(todoColumnDeadline, () => todo.deadline.toIso8601String());
     map.putIfAbsent(columnColor, () => Todo.toARGBString(todo.color));
     map.putIfAbsent(todoColumnListId, () => todo.listID);
+    map.putIfAbsent(todoColumnIsDone, () => todo.isDone ? 1 : 0);
     if (todo.id != -1)
       map.putIfAbsent(columnId, () => todo.id);
     else
@@ -161,7 +177,6 @@ class DBController {
     Database db = await instance.database;
     List<Map<String, dynamic>> mapList = await db.query(todoListTable);
     for (Map map in mapList) {
-
       result.putIfAbsent(map[columnId], () => mapToTodoList(map));
     }
     return result;
@@ -175,7 +190,8 @@ class DBController {
         deadline: DateTime.parse(map[todoColumnDeadline]),
         id: map[columnId],
         listID: map[todoColumnListId],
-        color: Todo.fromARGBString(map[columnColor]));
+        color: Todo.fromARGBString(map[columnColor]),
+        isDone: map[todoColumnIsDone] == 1 ? true : false);
   }
 
   /// transforms a query ResultMap to a To\doList
@@ -192,7 +208,7 @@ class DBController {
     Map<int, TodoList> todoLists = await queryTodoLists();
     Map<int, Todo> todos = await queryTodos();
     todos.forEach((id, todo) {
-      if (todoLists[todo.listID] == null)print('TODOLIST DOESNT EXIST');
+      if (todoLists[todo.listID] == null) print('TODOLIST DOESNT EXIST');
       todoLists[todo.listID].map.putIfAbsent(todo.id, () => todo);
     });
     return todoLists;

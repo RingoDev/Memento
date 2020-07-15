@@ -68,7 +68,7 @@ class Model {
     map.remove(todoList.id);
 
     /// remove from DB
-    DBController.instance.deleteTodoList(todoList.id);
+    DBController.instance.deleteFullTodoList(todoList.id);
   }
 
   void edit(TodoList old, TodoList edited) {

@@ -32,7 +32,7 @@ class _EditTodoListState extends State<EditTodoList> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text(!edit ? 'Create a new TODOlist' : 'Edit a TODOlist'),
+          title: Text(!edit ? 'Create a new TODOlist' : todoList.name),
         ),
         body: Container(
           padding: EdgeInsets.all(16.0),
@@ -44,12 +44,12 @@ class _EditTodoListState extends State<EditTodoList> {
     return Form(
       child: Column(
         children: <Widget>[
-          Text('Enter a Name'),
+          Text('Name'),
           TextFormField(
               maxLength: 60,
               onChanged: _selectName,
               initialValue: editedTodoList.name),
-          Text('Enter a Description'),
+          Text('Description'),
           TextFormField(
             initialValue: editedTodoList.description,
             keyboardType: TextInputType.multiline,
@@ -70,7 +70,7 @@ class _EditTodoListState extends State<EditTodoList> {
               // callback to parent widget to set state
               onChange(editedTodoList);
             },
-            child: Text('Save TodoList', style: TextStyle(fontSize: 20)),
+            child: Text('Save', style: TextStyle(fontSize: 20)),
           ),
         ],
       ),

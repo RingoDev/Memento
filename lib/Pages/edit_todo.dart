@@ -30,14 +30,13 @@ class _EditTodoState extends State<EditTodo> {
     this.todo = todo ?? Todo();
     this.editedTodo = this.todo.copy();
     // if its a newly added To\do use the list color as to\do color
-    if(!edit) this.editedTodo.color = this.todoList.color;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text(!edit ? 'Create a new TODO' : 'Edit a TODO'),
+          title: Text(!edit ? todoList.name : 'Edit a TODO'),
         ),
         body: Container(
           padding: EdgeInsets.all(16.0),
@@ -49,12 +48,12 @@ class _EditTodoState extends State<EditTodo> {
     return Form(
       child: Column(
         children: <Widget>[
-          Text('Enter a Name'),
+          Text('Name'),
           TextFormField(
               maxLength: 60,
               onChanged: _selectName,
               initialValue: editedTodo.name),
-          Text('Enter a Description'),
+          Text('Description'),
           TextFormField(
             initialValue: editedTodo.description,
             keyboardType: TextInputType.multiline,

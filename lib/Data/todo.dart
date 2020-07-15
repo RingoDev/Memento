@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:todo/Data/todo_list.dart';
+import 'package:todo/Database/db_controller.dart';
 import 'package:todo/main.dart';
 
 class Todo {
@@ -11,6 +12,7 @@ class Todo {
   TimeOfDay madeTime;
   DateTime deadline;
   int listID;
+  bool isDone;
 
   Todo(
       {Color color,
@@ -18,6 +20,7 @@ class Todo {
       this.id = -1,
       this.name = "",
       this.description = "",
+      this.isDone = false,
       DateTime madeDate,
       TimeOfDay madeTime,
       DateTime deadline})
@@ -31,7 +34,7 @@ class Todo {
         deadline.year, deadline.month, deadline.day, time.hour, time.minute);
   }
 
-  TodoList get todoList{
+  TodoList get todoList {
     return MyApp.model.map[this.listID];
   }
 
@@ -53,7 +56,9 @@ class Todo {
         '\nColor: ' +
         color.toString() +
         '\nDeadline: ' +
-        deadline.toIso8601String();
+        deadline.toIso8601String() +
+        '\nDone: ' +
+        isDone.toString();
   }
 
   /// formats a DateTime object to a String such as dd.mm.yyyy
@@ -65,13 +70,19 @@ class Todo {
         date.year.toString();
   }
 
+  set done(bool done){
+    this.isDone = done;
+    DBController.instance.toggleTodoState(this.id, done);
+  }
+
   Todo copy() {
     return Todo(
         id: this.id,
         name: this.name,
         description: this.description,
         deadline: this.deadline,
-        color: this.color);
+        color: this.color,
+        isDone: this.isDone);
   }
 
   /// converts a String with the Format: (255,255,255,255) to a Color Object
