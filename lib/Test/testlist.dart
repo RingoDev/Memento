@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:todo/Data/model.dart';
 import 'package:todo/Data/todo.dart';
 import 'package:todo/main.dart';
@@ -61,7 +63,10 @@ void createTestList() {
     );
 
     model.add(testlist);
-    testlist.add(Todo(name: 'TestTodo', deadline: DateTime(2020, 12, 31, 24)));
 
+    int x= Random().nextInt(15);
+    for(int j = 0;j<x;j++){
+      testlist.add(Todo(name: 'TestTodo'+j.toString(), deadline: DateTime(2021, j+x%12+1, j+x*10%29, j*2%24)));
+    }
   }
 }

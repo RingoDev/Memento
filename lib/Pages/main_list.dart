@@ -49,10 +49,16 @@ class _MainPageState extends State<MainPage> {
         body: _buildTodoLists(_buildWidgetList(MyApp.model.todoLists)));
   }
 
+  Widget _buildTodoLists(List<Widget> list) {
+
+    return ListView(children: list);
+  }
+
   List<Widget> _buildWidgetList(List<TodoList> todoLists) {
     List<Widget> result = List();
     for (TodoList todoList in todoLists) {
       result.add(_todoListToWidget(todoList));
+      result.add(Divider(thickness: 0,height: 0,color: Colors.grey,));
       if (todoList.detailed) {
         if (todoList.description != "")
           result.add(_todoListDescrToWidget(todoList));
@@ -241,13 +247,7 @@ class _MainPageState extends State<MainPage> {
     );
   }
 
-  Widget _buildTodoLists(List<Widget> list) {
-    final divided = ListTile.divideTiles(
-      context: context,
-      tiles: list,
-    ).toList();
-    return ListView(children: divided);
-  }
+
 
   static String formatTileText(TodoList todoList) {
     String str = todoList.name;
