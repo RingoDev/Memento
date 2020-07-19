@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
@@ -20,7 +21,7 @@ class TodoList {
       this.name = "",
       this.description = "",
       this.detailed = false}) {
-    this.color = color ?? Color(0xffffffff);
+    this.color = color ?? Color(4278190080+Random().nextInt(16777215));
     this.map = map ?? Map();
     this.id = id ?? MyApp.model.nextListID;
   }
