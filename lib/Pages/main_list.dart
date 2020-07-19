@@ -25,7 +25,8 @@ class _MainPageState extends State<MainPage> {
         appBar: AppBar(title: Text('All TodoLists'), actions: [
           IconButton(
               onPressed: () {
-                setState(() {MyApp.model.sort();});
+                setState(() {MyApp.model.sort();
+                _hideDetails();});
               },
               icon: Icon(Icons.refresh)),
           IconButton(
@@ -47,6 +48,11 @@ class _MainPageState extends State<MainPage> {
           )
         ]),
         body: _buildTodoLists(_buildWidgetList(MyApp.model.todoLists)));
+  }
+  void _hideDetails(){
+    for(TodoList todoList in MyApp.model.todoLists){
+      todoList.detailed = false;
+    }
   }
 
   Widget _buildTodoLists(List<Widget> list) {

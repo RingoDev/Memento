@@ -197,7 +197,6 @@ class DBController {
 
   /// updates a TodoList (including it's Todos)
   Future<void> update(int oldID, TodoList edited) async {
-    if(oldID!= edited.id)print('AHHHHHHHHHHHH');
     // remove the old List (including Todos) then insert the edited List (including Todos)
     await delete(oldID).whenComplete(() => insert(edited));
   }
@@ -205,16 +204,15 @@ class DBController {
   /// removes a TodoList (including it's Todos)
   Future<void> delete(int id) async {
     Database db = await instance.database;
-    // remove the List specified (including Todos)
     await db.delete(todoListTable, where: '$columnId = ?', whereArgs: [id]);
     await db.delete(todoTable, where: '$todoColumnListId = ?', whereArgs: [id]);
   }
 
   /// deletes all TodoLists and all Todos
-  Future<int> deleteAll() async {
+  Future<void> deleteAll() async {
     Database db = await instance.database;
     await db.delete(todoListTable);
-    return await db.delete(todoTable);
+    await db.delete(todoTable);
   }
 
   /// changes the 'Done' state of a To\do in the DB

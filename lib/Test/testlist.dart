@@ -26,7 +26,6 @@ void createTestList() {
   list1.add(Todo(
       name: 'Shaving cream for dad', deadline: DateTime(2020, 12, 23, 18)));
 
-  print(list1);
   model.add(list1);
 
   TodoList list2 = TodoList(
@@ -59,7 +58,7 @@ void createTestList() {
 
   for(int i = 0;i<10;i++){
     TodoList testlist = TodoList(
-      color: Colors.orange,
+      color: Color(4278190080+Random().nextInt(16777215)),
       name: 'TestList' + i.toString(),
       description: 'TestList TestDescription',
     );

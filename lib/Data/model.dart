@@ -5,6 +5,7 @@ import 'package:todo/Database/db_controller.dart';
 
 /// holds Data and Settings of this App Instance
 class Model {
+  // TODO keep list of available IDs
   Map<int, TodoList> map;
   Color color = Color(0xffffffff);
 
@@ -60,7 +61,7 @@ class Model {
 
   // to make sure DB and model are always at the same state only use these access methods.
 
-  /// adds a TodoList (without it's Todos) to the model and the DB
+  /// adds a TodoList (with it's Todos) to the model and the DB
   void add(TodoList todoList) {
     todoList.id = nextListID;
 
@@ -75,10 +76,10 @@ class Model {
 
   /// removes a TodoList and it's Todos from the model and from the DB
   void remove(TodoList todoList) {
-    /// remove from model
+    // remove from model
     map.remove(todoList.id);
 
-    /// remove from DB
+    // remove from DB
     DBController.instance.delete(todoList.id);
 
     sort();
@@ -88,11 +89,11 @@ class Model {
   void edit(TodoList old, TodoList edited) {
     edited.id = old.id;
 
-    /// editing in model
+    // editing in model
     map.remove(old.id);
     map.putIfAbsent(edited.id, () => edited);
 
-    /// editing in DB
+    // editing in DB
     DBController.instance.update(old.id, edited);
 
     sort();
@@ -100,10 +101,10 @@ class Model {
 
   /// removes all the TodoLists and Todos from the model and the DB
   void removeAll() {
-    /// remove All from model
+    // remove All from model
     map.clear();
 
-    /// remove All from DB
+    // remove All from DB
     DBController.instance.deleteAll();
 
     sort();
