@@ -40,6 +40,8 @@ class _TodoDetailState extends State<TodoDetail> {
     );
   }
 
+  // Todo make page nicer
+  /// Builds the 'Todo_Detail' page
   Widget _buildTodo(todo) {
     return Column(
       children: <Widget>[
@@ -55,6 +57,7 @@ class _TodoDetailState extends State<TodoDetail> {
     );
   }
 
+  /// navigates to the 'Edit_Todo' page and passes the the current To\do on to the page.
   void _editTodo() {
     Navigator.of(context).push(
       MaterialPageRoute<void>(

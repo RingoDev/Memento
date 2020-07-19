@@ -7,16 +7,17 @@ import 'package:flutter/material.dart';
 import 'package:todo/Data/todo_list.dart';
 
 void createTestList() {
+
+
   Model model = MyApp.model;
   if(model.todoLists.any((list) => list.name == 'Christmas Presents')) return;
+  print('adding Testlist');
 
   TodoList list1 = TodoList(
     color: Colors.blue,
     name: 'Christmas Presents',
     description: 'Get presents for the whole family',
   );
-
-  model.add(list1);
   list1.add(Todo(
     name: 'Vase for mom',
     description: 'Get the blue vase from Mueller that she wanted',
@@ -25,7 +26,8 @@ void createTestList() {
   list1.add(Todo(
       name: 'Shaving cream for dad', deadline: DateTime(2020, 12, 23, 18)));
 
-
+  print(list1);
+  model.add(list1);
 
   TodoList list2 = TodoList(
       color: Colors.green,

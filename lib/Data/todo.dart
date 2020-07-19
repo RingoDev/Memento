@@ -11,27 +11,40 @@ class Todo {
   DateTime madeDate;
   TimeOfDay madeTime;
   DateTime deadline;
-  int listID;
   bool isDone;
+  int _listID;
 
   Todo(
       {Color color,
-      this.listID = -1,
       this.id = -1,
       this.name = "",
       this.description = "",
       this.isDone = false,
+      int listID,
       DateTime madeDate,
       TimeOfDay madeTime,
       DateTime deadline})
       : this.color = color ?? Color(0xffffffff),
         this.madeDate = madeDate ?? DateTime.now(),
         this.madeTime = madeTime ?? TimeOfDay.now(),
-        this.deadline = deadline ?? DateTime.now();
+        this.deadline = deadline ?? DateTime.now(),
+        this._listID = listID ?? null;
 
   void setTime(TimeOfDay time) {
     this.deadline = DateTime(
         deadline.year, deadline.month, deadline.day, time.hour, time.minute);
+  }
+
+  /// returns the ID of the List this To\do is associated with in the model;
+  int get listID {
+    if (this._listID == null)
+      return MyApp.model.getList(this).id;
+    else
+      return this._listID;
+  }
+
+  set listID(int id) {
+    this._listID = id;
   }
 
   TodoList get todoList {
@@ -70,7 +83,7 @@ class Todo {
         date.year.toString();
   }
 
-  set done(bool done){
+  set done(bool done) {
     this.isDone = done;
     DBController.instance.toggleTodoState(this.id, done);
   }

@@ -1,6 +1,6 @@
-
 import 'dart:ui';
 
+import 'package:flutter/cupertino.dart';
 import 'package:todo/Data/todo.dart';
 import 'package:todo/Database/db_controller.dart';
 import 'package:todo/main.dart';
@@ -13,16 +13,16 @@ class TodoList {
   int id;
   bool detailed;
 
-  TodoList({
-    Map map,
-    Color color,
-    this.id = -1,
-    this.name = "",
-    this.description = "",
-    this.detailed = false
-  }) {
+  TodoList(
+      {Map map,
+      Color color,
+      int id,
+      this.name = "",
+      this.description = "",
+      this.detailed = false}) {
     this.color = color ?? Color(0xffffffff);
     this.map = map ?? Map();
+    this.id = id ?? MyApp.model.nextListID;
   }
 
   TodoList copy() {
@@ -34,17 +34,29 @@ class TodoList {
         color: this.color);
   }
 
+  int get nextID {
+    int i = id * 1000 +1;
+    while (true) {
+      if (!map.containsKey(i))
+        return i;
+      else
+        i++;
+    }
+  }
 
-  List<Todo> get openTodos{
+  List<Todo> get openTodos {
     List<Todo> list = List();
-    for (Todo todo in this.todos){
-      if(!todo.isDone)list.add(todo);
+    for (Todo todo in this.todos) {
+      if (!todo.isDone) list.add(todo);
     }
     return list;
   }
-  bool get hasDeadline{
-    if(this.deadline == DateTime(3000))return false;
-    else return true;
+
+  bool get hasDeadline {
+    if (this.deadline == DateTime(3000))
+      return false;
+    else
+      return true;
   }
 
   @override
@@ -75,8 +87,8 @@ class TodoList {
     return list;
   }
 
-  bool get allDone{
-    for (Todo todo in map.values){
+  bool get allDone {
+    for (Todo todo in map.values) {
       if (!todo.isDone) return false;
     }
     return true;
@@ -94,22 +106,23 @@ class TodoList {
 
   /// adds To\do to the TodoList and to the DB
   void add(Todo todo) {
-    todo.id = MyApp.model.nextTodoID;
-    todo.listID = this.id;
 
-    /// add to todoList
+    // to\do ids are in the form of xyyy where x is the list id and yyy the to\do id in the list;
+    todo.id = nextID;
+    todo.listID = this.id;
+    // add to todoList
     map.putIfAbsent(todo.id, () => todo);
 
-    /// add to DB
-    DBController.instance.insertTodo(todo);
+    // update this todoList in DB
+    DBController.instance.update(this.id, this);
   }
 
   void remove(Todo todo) {
     /// remove from TodoList
     map.remove(todo.id);
 
-    /// remove from DB
-    DBController.instance.deleteTodo(todo.id);
+    // update this todoList in DB
+    DBController.instance.update(this.id, this);
   }
 
   void edit(Todo old, Todo edited) {
@@ -120,16 +133,7 @@ class TodoList {
     map.remove(old.id);
     map.putIfAbsent(edited.id, () => edited);
 
-    /// editing in DB
-    DBController.instance.deleteTodo(old.id);
-    DBController.instance.insertTodo(edited);
-  }
-
-  void removeAll() {
-    /// remove All from todoList
-    map.clear();
-
-    /// remove All from DB
-    DBController.instance.deleteAllTodos();
+    // update this todoList in DB
+    DBController.instance.update(this.id, this);
   }
 }

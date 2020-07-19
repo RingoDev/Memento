@@ -25,7 +25,7 @@ class _MainPageState extends State<MainPage> {
         appBar: AppBar(title: Text('All TodoLists'), actions: [
           IconButton(
               onPressed: () {
-                setState(() {});
+                setState(() {MyApp.model.sort();});
               },
               icon: Icon(Icons.refresh)),
           IconButton(

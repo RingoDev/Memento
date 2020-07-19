@@ -23,6 +23,8 @@ class _EditTodoListState extends State<EditTodoList> {
   final void Function(TodoList edited) onChange;
   final bool edit;
 
+  /// if a todoList was specified, use it as template for the site.
+  /// otherwise create empty TodoList
   _EditTodoListState(this.edit, this.onChange, {TodoList todoList}) {
     this.todoList = todoList ?? TodoList();
     this.editedTodoList = this.todoList.copy();
@@ -32,7 +34,19 @@ class _EditTodoListState extends State<EditTodoList> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text(!edit ? 'Create a new TODOlist' : todoList.name),
+          title: Text(!edit
+              ? (editedTodoList.name == '' ? 'Create a new Todolist' : editedTodoList.name)
+              : todoList.name),
+          actions: <Widget>[
+            IconButton(
+                icon: Icon(Icons.check),
+                onPressed: () {
+                  _saveTodoList(context);
+                  print(editedTodoList);
+                  // callback to parent widget to set state
+                  onChange(editedTodoList);
+                })
+          ],
         ),
         body: Container(
           padding: EdgeInsets.all(16.0),
@@ -57,20 +71,10 @@ class _EditTodoListState extends State<EditTodoList> {
             onChanged: _selectDescription,
           ),
           SizedBox(height: 10),
-          Text('Color'),
           FlatButton(
             color: editedTodoList.color,
             onPressed: () => _openColorPicker(),
-            child: null,
-          ),
-          RaisedButton(
-            onPressed: () {
-              _saveTodoList(context);
-              print(editedTodoList);
-              // callback to parent widget to set state
-              onChange(editedTodoList);
-            },
-            child: Text('Save', style: TextStyle(fontSize: 20)),
+            child: Text('Color'),
           ),
         ],
       ),
@@ -91,17 +95,18 @@ class _EditTodoListState extends State<EditTodoList> {
       });
   }
 
+  /// if page is in 'edit' mode To\do is edited otherwise its saved.
+  /// navigates to the previous page after saving.
   void _saveTodoList(context) {
     if (edit) {
       MyApp.model.edit(todoList, editedTodoList);
     } else {
       MyApp.model.add(editedTodoList);
     }
-
-    /// returning to previous page
     Navigator.of(context).pop();
   }
 
+  /// shows a pop-up to pick a color
   void _openColorPicker() {
     showDialog(
       context: context,
