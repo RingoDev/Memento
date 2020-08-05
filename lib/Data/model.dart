@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:todo/Data/todo.dart';
-import 'package:todo/Data/todo_list.dart';
-import 'package:todo/Database/db_controller.dart';
+import 'package:memento/Data/todo.dart';
+import 'package:memento/Data/todo_list.dart';
+import 'package:memento/Database/db_controller.dart';
 
 /// holds Data and Settings of this App Instance
 class Model {

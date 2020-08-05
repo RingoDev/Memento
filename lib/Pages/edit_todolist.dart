@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_material_color_picker/flutter_material_color_picker.dart';
-import 'package:todo/Data/todo_list.dart';
-import 'package:todo/main.dart';
+import 'package:memento/Data/todo_list.dart';
+import 'package:memento/main.dart';
 
 class EditTodoList extends StatefulWidget {
   final void Function(TodoList edited) onChange;

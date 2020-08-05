@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:todo/Data/todo_list.dart';
-import 'package:todo/Pages/edit_todolist.dart';
+import 'package:memento/Data/todo_list.dart';
+import 'package:memento/Pages/edit_todolist.dart';
 
-import 'package:todo/main.dart';
+import 'package:memento/main.dart';
 import '../Data/todo.dart';
 import 'edit_todo.dart';
 import 'inspect_todo.dart';

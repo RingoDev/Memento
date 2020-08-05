@@ -1,8 +1,8 @@
 import 'package:sqflite/sqflite.dart';
 import 'dart:async';
 import 'package:path/path.dart';
-import 'package:todo/Data/todo.dart';
-import 'package:todo/Data/todo_list.dart';
+import 'package:memento/Data/todo.dart';
+import 'package:memento/Data/todo_list.dart';
 
 class DBController {
   static final _databaseName = "todoapp.db";

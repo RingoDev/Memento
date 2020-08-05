@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:todo/Pages/main_list.dart';
-import 'package:todo/Test/testlist.dart';
+import 'package:memento/Pages/main_list.dart';
+import 'package:memento/Test/testlist.dart';
 
 import 'Data/model.dart';
 

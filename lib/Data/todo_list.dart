@@ -2,9 +2,9 @@ import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
-import 'package:todo/Data/todo.dart';
-import 'package:todo/Database/db_controller.dart';
-import 'package:todo/main.dart';
+import 'package:memento/Data/todo.dart';
+import 'package:memento/Database/db_controller.dart';
+import 'package:memento/main.dart';
 
 class TodoList {
   Map<int, Todo> map;
