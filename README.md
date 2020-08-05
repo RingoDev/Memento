@@ -17,7 +17,7 @@ samples, guidance on mobile development, and a full API reference.
 
 ## Goals
 
-* add app to firebase project
-* allow for user authentication
+* [x] add app to firebase project
+* [x] allow for user authentication
 * store todolists in firebase DB
 * ask for login on startup
