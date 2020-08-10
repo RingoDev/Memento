@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:memento/Authentication/auth.dart';
 import 'package:memento/Pages/main_list.dart';
 import 'package:memento/Test/testlist.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -18,6 +19,7 @@ void main() {
 class MyApp extends StatefulWidget {
   final bool test;
   static Model model;
+  static AuthController auth;
 
   MyApp({this.test = false});
 
@@ -28,9 +30,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   bool test;
   int buildCounter;
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  FirebaseUser user;
+
 
   Future<Map<int, TodoList>> dataFuture;
 
@@ -40,8 +40,8 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     buildCounter = 0;
-    _handleSignIn();
     dataFuture = DBController.instance.queryAll();
+    MyApp.auth = AuthController();
   }
 
   @override
@@ -67,17 +67,5 @@ class _MyAppState extends State<MyApp> {
     );
   }
 
-  Future<FirebaseUser> _handleSignIn() async {
-    final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
-    final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
 
-    final AuthCredential credential = GoogleAuthProvider.getCredential(
-      accessToken: googleAuth.accessToken,
-      idToken: googleAuth.idToken,
-    );
-
-    final FirebaseUser user = (await _auth.signInWithCredential(credential)).user;
-    print("signed in " + user.displayName);
-    return user;
-  }
 }
