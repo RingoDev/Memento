@@ -19,5 +19,5 @@ samples, guidance on mobile development, and a full API reference.
 
 * [x] add app to firebase project
 * [x] allow for user authentication
-* store todolists in firebase DB
+* [x] store todolists in firebase DB
 * ask for login on startup
