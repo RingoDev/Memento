@@ -7,17 +7,18 @@ class MenuDrawer extends StatefulWidget {
   final VoidCallback setParentState;
   final VoidCallback popParent;
 
-  MenuDrawer(this.setParentState,this.popParent);
+  MenuDrawer(this.setParentState, this.popParent);
 
   @override
-  State<StatefulWidget> createState() => _MenuDrawerState(this.setParentState,this.popParent);
+  State<StatefulWidget> createState() =>
+      _MenuDrawerState(this.setParentState, this.popParent);
 }
 
 class _MenuDrawerState extends State<MenuDrawer> {
   VoidCallback setParentState;
   VoidCallback popParent;
 
-  _MenuDrawerState(this.setParentState,this.popParent);
+  _MenuDrawerState(this.setParentState, this.popParent);
 
   @override
   Widget build(BuildContext context) {
@@ -59,9 +60,28 @@ class _MenuDrawerState extends State<MenuDrawer> {
             leading: Icon(Icons.add),
             title: Text('add TestData'),
             onTap: () => {
-             createTestList(),
+              createTestList(),
               this.setParentState.call(),
               Navigator.of(context).pop()
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.cloud_upload),
+            title: Text('Save data'),
+            onTap: () => {
+              MyApp.cloud.uploadAll(),
+              this.setParentState.call(),
+              Navigator.of(context).pop()
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.cloud_download),
+            title: Text('download data'),
+            onTap: () => {
+              MyApp.cloud.downloadAllAndOverwrite(() {
+                this.setParentState.call();
+                Navigator.of(context).pop();
+              }),
             },
           ),
         ],

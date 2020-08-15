@@ -1,13 +1,17 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:memento/Data/settings.dart';
 import 'package:memento/Data/todo.dart';
 import 'package:memento/Data/todo_list.dart';
 import 'package:memento/Database/db_controller.dart';
 
 /// holds Data and Settings of this App Instance
 class Model {
+
   // TODO keep list of available IDs
   Map<int, TodoList> map;
-  Color color = Color(0xffffffff);
+  Settings settings;
 
   //the todoList which is operated upon
   List<TodoList> todoLists;
@@ -22,7 +26,7 @@ class Model {
   }
 
 
-  Model(this.map, {this.color}) {
+  Model(this.map, {this.settings}) {
     sort();
   }
 
@@ -108,5 +112,27 @@ class Model {
     DBController.instance.deleteAll();
 
     sort();
+  }
+
+  Map toJson(){
+
+    Map result = {
+      'todolists' : this.map.values.toList()
+    };
+    return result;
+  }
+
+  factory Model.fromJson(json){
+
+    List<TodoList> result = List();
+    (json['todolists'] as List).forEach((dynamic element) {result.add(TodoList.fromJson(element));});
+    Map<int,TodoList> resultMap = Map.fromIterable(result,key: (tl)=> tl.id,value:(tl)=>tl);
+    return Model(resultMap);
+
+  }
+
+  @override
+  String toString() {
+    return 'Model{map: $map}';
   }
 }

@@ -19,6 +19,12 @@ class AuthController {
     }
   }
 
+  refreshUser() async {
+    FirebaseUser user = await _auth.currentUser();
+    this.user = user;
+    return user;
+  }
+
 
   AuthController(){
     this.callbacks = List();

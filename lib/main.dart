@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:memento/Authentication/auth.dart';
+import 'package:memento/Database/cloud_storage.dart';
 import 'package:memento/Pages/main_list.dart';
 import 'package:memento/Test/testlist.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 import 'Data/model.dart';
 
@@ -20,6 +19,7 @@ class MyApp extends StatefulWidget {
   final bool test;
   static Model model;
   static AuthController auth;
+  static CloudController cloud;
 
   MyApp({this.test = false});
 
@@ -42,6 +42,7 @@ class _MyAppState extends State<MyApp> {
     buildCounter = 0;
     dataFuture = DBController.instance.queryAll();
     MyApp.auth = AuthController();
+    MyApp.cloud = CloudController();
   }
 
   @override

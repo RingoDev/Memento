@@ -102,11 +102,7 @@ class DBController {
     else
       print('ID WAS -1 !!!');
     Database db = await instance.database;
-    return await db.insert(todoTable, map).catchError((e) {
-      print(e.toString());
-
-      return 0;
-    });
+    return db.insert(todoTable, map);
   }
 
   /// queries the SQLite Database for all the saved Todos and returns them as a Map<ID,To\do>
@@ -188,31 +184,34 @@ class DBController {
   /// inserts a TodoList (including it's Todos)
   Future<void> insert(TodoList todoList) async {
     // insert the TodoList
-    await _insertTodoList(todoList);
+    print('Inserted TodoList with ID '+ (await _insertTodoList(todoList)).toString());
     //insert the Todos
+
     todoList.map.forEach((id, todo) async {
-      await _insertTodo(todo);
+      print('Inserted Todo with ID '+ (await _insertTodo(todo)).toString());
     });
+
   }
 
   /// updates a TodoList (including it's Todos)
   Future<void> update(int oldID, TodoList edited) async {
     // remove the old List (including Todos) then insert the edited List (including Todos)
-    await delete(oldID).whenComplete(() => insert(edited));
+    await delete(oldID);
+    await insert(edited);
   }
 
   /// removes a TodoList (including it's Todos)
   Future<void> delete(int id) async {
     Database db = await instance.database;
-    await db.delete(todoListTable, where: '$columnId = ?', whereArgs: [id]);
-    await db.delete(todoTable, where: '$todoColumnListId = ?', whereArgs: [id]);
+    print('Deleted ' + (await db.delete(todoListTable, where: '$columnId = ?', whereArgs: [id])).toString() + ' TodoListsy');
+    print('Deleted ' + (await db.delete(todoTable, where: '$todoColumnListId = ?', whereArgs: [id])).toString() + ' Todosy');
   }
 
   /// deletes all TodoLists and all Todos
   Future<void> deleteAll() async {
     Database db = await instance.database;
-    await db.delete(todoListTable);
-    await db.delete(todoTable);
+    print('Deleted ' + (await db.delete(todoListTable)).toString() + ' TodoLists');
+    print('Deleted ' + (await db.delete(todoTable)).toString() + ' Todos');
   }
 
   /// changes the 'Done' state of a To\do in the DB
@@ -221,5 +220,11 @@ class DBController {
     Map<String, dynamic> map = Map();
     map.putIfAbsent(todoColumnIsDone, () => done ? 1 : 0);
     await db.update(todoTable, map, where: '$columnId = ?', whereArgs: [id]);
+  }
+
+  Future<void> queryDB() async {
+    Database db = await instance.database;
+    print('TODOLISTS' + (await db.query(todoListTable)).toString());
+    print('TODOS' + (await db.query(todoTable)).toString());
   }
 }

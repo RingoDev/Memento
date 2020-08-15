@@ -118,4 +118,25 @@ class Todo {
         color.blue.toString() +
         ')';
   }
+
+  Map toJson() {
+    Map result = {
+      'id': this.id,
+      'description': this.description,
+      'color': Todo.toARGBString(this.color),
+      'deadline': this.deadline.toIso8601String(),
+      'isDone': this.isDone
+    };
+    return result;
+  }
+
+  factory Todo.fromJson(json) {
+    Todo result = Todo(
+        id: json['id'],
+        color: Todo.fromARGBString(json['color'] as String),
+        description: json['description'] as String,
+    deadline: DateTime.parse(json['deadline'] as String),
+    isDone: json['isDone'] as bool);
+    return result;
+  }
 }
