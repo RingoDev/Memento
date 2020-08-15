@@ -1,10 +1,8 @@
 # memento
 
-Todoapp with flutter.
-
-User Authentication is managed via Firebase User Auth.
-
-Todos are stored online in Firebase storage.
+* Todoapp with flutter. 
+* User Authentication is managed via Firebase User Auth.
+* Todos are stored online in Firebase storage.
 
 ## Goals
 
