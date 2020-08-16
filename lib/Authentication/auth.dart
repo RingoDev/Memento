@@ -50,12 +50,13 @@ class AuthController {
     return m;
   }
 
-  signInWithGoogle({VoidCallback callback}) async {
+  signInWithGoogle({Function(FirebaseUser user) callback}) async {
 
     this.user = await _handleGoogleSignIn();
     _handleGoogleSignIn().then((user) {
       this.user=user;
-    }).whenComplete(() => callback.call());
+      callback(user);
+    });
   }
 
   /// returns a Firebase User future
@@ -79,7 +80,7 @@ class AuthController {
     await _auth.signOut();
   }
 
-  logOut() async{
+  Future<void> logOut() async{
     await _handleLogOut();
     this.user = null;
   }

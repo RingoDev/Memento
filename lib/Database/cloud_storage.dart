@@ -19,12 +19,20 @@ class CloudController {
     });
   }
 
-  upload(File jsonFile) async {
+  /// returns user if logged in, otherwise throws exception
+  Future<FirebaseUser> checkLogin() async {
     if (this.user == null) {
       // second chance
-      FirebaseUser refreshedUser = await MyApp.auth.refreshUser();
-      if (refreshedUser == null) return;
+      this.user = await MyApp.auth.refreshUser();
+      if (this.user == null) throw Exception('Not logged in');
     }
+    return this.user;
+  }
+
+  /// uploads a User specific File to the cloud storage
+  /// returns true if task is uploaded successfully and false if not.
+  Future<bool> upload(File jsonFile) async {
+    this.user = await checkLogin();
 
     print('uploading data');
     final StorageReference firebaseStorageRef =
@@ -32,37 +40,29 @@ class CloudController {
 
     StorageUploadTask uploadTask = firebaseStorageRef.putFile(jsonFile);
 
-    StorageTaskSnapshot storageSnapshot = await uploadTask.onComplete;
+    await uploadTask.onComplete;
 
-    var downloadUrl = await storageSnapshot.ref.getDownloadURL();
-
-    if (uploadTask.isComplete) {
-      var url = downloadUrl.toString();
-      return CloudStorageResult(
-        url: url,
-        fileName: this.user.uid,
-      );
-    }
-    return null;
+    return uploadTask.isComplete;
   }
 
-  uploadAll() async {
+  /// uploads the whole model to the cloud storage and overwrites old data
+  Future<bool> uploadAllAndOverwrite() async {
+    // if not logged in throw error
+    this.user = await checkLogin();
     String encoded = jsonEncode(MyApp.model);
     final directory = await Directory.systemTemp.createTemp();
     File temp = File(directory.path + '/' + 'tempfile.json');
     temp.createSync();
     temp.writeAsStringSync(encoded);
-    var result = await MyApp.cloud.upload(temp);
-    temp.delete();
+    bool result = await MyApp.cloud.upload(temp);
+    await temp.delete();
     return result;
   }
 
-  download() async {
-    if (this.user == null) {
-      // second chance
-      FirebaseUser refreshedUser = await MyApp.auth.refreshUser();
-      if (refreshedUser == null) return;
-    }
+  /// downloads the user File and returns it as a String
+  Future<String> download() async {
+    this.user = await checkLogin();
+
     print('downloading data');
     final StorageReference firebaseStorageRef =
         this.storage.ref().child('user/' + this.user.uid);
@@ -73,29 +73,22 @@ class CloudController {
     return utf8.decode(json);
   }
 
+  /// if no error is forwarded, download was successful
   Future<Model> downloadAll() async {
-    String jsonString = await download();
-    Model model = Model.fromJson(jsonDecode(jsonString));
+    Model model;
+    await download()
+        .then((value) => {model = Model.fromJson(jsonDecode(value))});
     return model;
   }
 
-  downloadAllAndOverwrite(VoidCallback callback) async {
-    Future<Model> modelFuture = downloadAll();
-    modelFuture
-        .then((value) => {
-              MyApp.model = value,
-              DBController.instance.deleteAll(),
-              MyApp.model.todoLists.forEach((element) {
-                DBController.instance.insert(element);
-              })
-            })
-        .whenComplete(() => callback.call());
+  /// if no error is forwarded, download and override were successful
+  Future<void> downloadAllAndOverwrite(VoidCallback callback) async {
+    await downloadAll().then((value) async {
+      MyApp.model = value;
+      await DBController.instance.deleteAll();
+      MyApp.model.todoLists.forEach((element) async {
+        await DBController.instance.insert(element);
+      });
+    }).whenComplete(() => callback.call());
   }
-}
-
-class CloudStorageResult {
-  final String url;
-  final String fileName;
-
-  CloudStorageResult({this.url, this.fileName});
 }

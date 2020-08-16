@@ -1,6 +1,3 @@
-import 'dart:convert';
-
-import 'package:flutter/material.dart';
 import 'package:memento/Data/settings.dart';
 import 'package:memento/Data/todo.dart';
 import 'package:memento/Data/todo_list.dart';
@@ -64,6 +61,8 @@ class Model {
   }
 
   // to make sure DB and model are always at the same state only use these access methods.
+  // with every function, whole model is uploaded to storage which is very inefficient.
+  // maybe think about using Firestore
 
   /// adds a TodoList (with it's Todos) to the model and the DB
   void add(TodoList todoList) {

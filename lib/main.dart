@@ -10,36 +10,29 @@ import 'Data/todo_list.dart';
 import 'Database/db_controller.dart';
 
 void main() {
-  runApp(MyApp(
-    test: true,
-  ));
+  runApp(MyApp());
 }
 
 class MyApp extends StatefulWidget {
-  final bool test;
+  static bool debug = false;
   static Model model;
   static AuthController auth;
   static CloudController cloud;
 
-  MyApp({this.test = false});
+  MyApp();
 
   @override
-  State<StatefulWidget> createState() => _MyAppState(test: this.test);
+  State<StatefulWidget> createState() => _MyAppState();
 }
 
 class _MyAppState extends State<MyApp> {
-  bool test;
-  int buildCounter;
-
-
   Future<Map<int, TodoList>> dataFuture;
 
-  _MyAppState({this.test});
+  _MyAppState();
 
   @override
   void initState() {
     super.initState();
-    buildCounter = 0;
     dataFuture = DBController.instance.queryAll();
     MyApp.auth = AuthController();
     MyApp.cloud = CloudController();
@@ -54,11 +47,9 @@ class _MyAppState extends State<MyApp> {
         builder:
             (BuildContext context, AsyncSnapshot<Map<int, TodoList>> snapshot) {
           if (snapshot.hasData) {
-            if(buildCounter == 0){
-              MyApp.model = Model(snapshot.data);
-              if (test) createTestList();
-            }
-            buildCounter++;
+            MyApp.model = Model(snapshot.data);
+            if (MyApp.debug) createTestList();
+
             return MainPage();
           } else
             return Center(child: CircularProgressIndicator());
@@ -67,6 +58,4 @@ class _MyAppState extends State<MyApp> {
       theme: ThemeData.light(),
     );
   }
-
-
 }

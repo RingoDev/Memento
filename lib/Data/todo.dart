@@ -122,6 +122,7 @@ class Todo {
   Map toJson() {
     Map result = {
       'id': this.id,
+      'name': this.name,
       'description': this.description,
       'color': Todo.toARGBString(this.color),
       'deadline': this.deadline.toIso8601String(),
@@ -133,10 +134,11 @@ class Todo {
   factory Todo.fromJson(json) {
     Todo result = Todo(
         id: json['id'],
+        name: json['name'] as String,
         color: Todo.fromARGBString(json['color'] as String),
         description: json['description'] as String,
-    deadline: DateTime.parse(json['deadline'] as String),
-    isDone: json['isDone'] as bool);
+        deadline: DateTime.parse(json['deadline'] as String),
+        isDone: json['isDone'] as bool);
     return result;
   }
 }

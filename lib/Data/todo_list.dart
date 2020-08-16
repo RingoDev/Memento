@@ -1,5 +1,3 @@
-import 'dart:convert';
-import 'dart:io';
 import 'dart:math';
 import 'dart:ui';
 
@@ -16,12 +14,13 @@ class TodoList {
   int id;
   bool detailed;
 
-  TodoList({Map map,
-    Color color,
-    int id,
-    this.name = "",
-    this.description = "",
-    this.detailed = false}) {
+  TodoList(
+      {Map map,
+      Color color,
+      int id,
+      this.name = "",
+      this.description = "",
+      this.detailed = false}) {
     this.color = color ?? Color(4278190080 + Random().nextInt(16777215));
     this.map = map ?? Map();
     this.id = id ?? MyApp.model.nextListID;
@@ -150,6 +149,7 @@ class TodoList {
   Map toJson() {
     Map result = {
       'id': this.id,
+      'name': this.name,
       'description': this.description,
       'color': Todo.toARGBString(this.color),
       'todos': this.map.values.toList()
@@ -160,11 +160,15 @@ class TodoList {
 
   factory TodoList.fromJson(json) {
     List<Todo> result = List();
-    (json['todos'] as List).forEach((dynamic element) {result.add(Todo.fromJson(element));});
-    Map<int,Todo> resultMap = Map.fromIterable(result,key: (t)=> t.id,value:(t)=>t);
+    (json['todos'] as List).forEach((dynamic element) {
+      result.add(Todo.fromJson(element));
+    });
+    Map<int, Todo> resultMap =
+        Map.fromIterable(result, key: (t) => t.id, value: (t) => t);
 
     return TodoList(
-      map: resultMap,
+        map: resultMap,
+        name: json['name'],
         color: Todo.fromARGBString(json['color'] as String),
         id: json['id'],
         description: json['description'] as String);

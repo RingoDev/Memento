@@ -9,16 +9,19 @@ import 'edit_todo.dart';
 import 'inspect_todo.dart';
 
 class MainPage extends StatefulWidget {
-  MainPage();
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  MainPage() {}
 
   @override
-  _MainPageState createState() => _MainPageState();
+  _MainPageState createState() => _MainPageState(this._scaffoldKey);
 }
 
 class _MainPageState extends State<MainPage> {
   final _biggerFont = TextStyle(fontSize: 18.0);
+  final _scaffoldKey;
 
-  _MainPageState() {
+  _MainPageState(this._scaffoldKey) {
     MyApp.auth.addCallback(() {
       setState(() {});
     });
@@ -27,8 +30,11 @@ class _MainPageState extends State<MainPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        key: _scaffoldKey,
         drawer: MenuDrawer(
-            () => {setState(() {})}, () => {Navigator.of(context).pop()}),
+            () => {setState(() {})},
+            () => {Navigator.of(context).pop()},
+            (Text snackText) => {_displaySnackBar(snackText)}),
         appBar: AppBar(title: Text('All TodoLists'), actions: [
           IconButton(
               onPressed: () {
@@ -57,6 +63,11 @@ class _MainPageState extends State<MainPage> {
     for (TodoList todoList in MyApp.model.todoLists) {
       todoList.detailed = false;
     }
+  }
+
+  void _displaySnackBar(Text text) {
+    final snackBar = SnackBar(content: text);
+    _scaffoldKey.currentState.showSnackBar(snackBar);
   }
 
   Widget _profileButton() {
@@ -88,8 +99,11 @@ class _MainPageState extends State<MainPage> {
                     textAlign: TextAlign.center,
                     style:
                         TextStyle(fontSize: 18.0, fontStyle: FontStyle.italic)),
-                onPressed: () =>
-                    {MyApp.auth.logOut(), Navigator.of(context).pop()},
+                onPressed: () => {
+                  MyApp.auth.logOut().whenComplete(() =>
+                      {_displaySnackBar(Text('Logged out successfully'))}),
+                  Navigator.of(context).pop()
+                },
               ));
         });
   }
@@ -101,40 +115,7 @@ class _MainPageState extends State<MainPage> {
         return AlertDialog(
             title: Text('Login via social account'),
             content: Container(
-              child: ListView(
-                children: <Widget>[
-                  ListTile(
-                    leading: Icon(Icons.input),
-                    title: Text('Login with Google'),
-                    onTap: () => {
-                      MyApp.auth.signInWithGoogle(
-                          callback: () => {
-                                Navigator.of(context).pop(),
-                              })
-                    },
-                  ),
-                  ListTile(
-                    leading: Icon(Icons.settings),
-                    title: Text('Login with Apple'),
-                    onTap: () => {Navigator.of(context).pop()},
-                  ),
-                  ListTile(
-                    leading: Icon(Icons.verified_user),
-                    title: Text('Login with Github'),
-                    onTap: () => {Navigator.of(context).pop()},
-                  ),
-                  ListTile(
-                    leading: Icon(Icons.exit_to_app),
-                    title: Text('Login with Facebook'),
-                    onTap: () => {Navigator.of(context).pop()},
-                  ),
-                  ListTile(
-                    leading: Icon(Icons.exit_to_app),
-                    title: Text('Login with Twitter'),
-                    onTap: () => {Navigator.of(context).pop()},
-                  ),
-                ],
-              ),
+              child: ListView(children: _createLoginList()),
               height: 300,
               width: 300,
             ),
@@ -147,6 +128,44 @@ class _MainPageState extends State<MainPage> {
             ]);
       },
     );
+  }
+
+  List<Widget> _createLoginList() {
+    List<Widget> list = List();
+    list.add(ListTile(
+      leading: Icon(Icons.input),
+      title: Text('Login with Google'),
+      onTap: () => {
+        MyApp.auth.signInWithGoogle(
+            callback: (user) =>
+                {_displaySnackBar(Text('Signed in as ' + user.displayName))}),
+        Navigator.of(context).pop()
+      },
+    ));
+    if (MyApp.debug)
+      list.addAll([
+        ListTile(
+          leading: Icon(Icons.settings),
+          title: Text('Login with Apple'),
+          onTap: () => {Navigator.of(context).pop()},
+        ),
+        ListTile(
+          leading: Icon(Icons.verified_user),
+          title: Text('Login with Github'),
+          onTap: () => {Navigator.of(context).pop()},
+        ),
+        ListTile(
+          leading: Icon(Icons.exit_to_app),
+          title: Text('Login with Facebook'),
+          onTap: () => {Navigator.of(context).pop()},
+        ),
+        ListTile(
+          leading: Icon(Icons.exit_to_app),
+          title: Text('Login with Twitter'),
+          onTap: () => {Navigator.of(context).pop()},
+        )
+      ]);
+    return list;
   }
 
   Widget _buildTodoLists(List<Widget> list) {
@@ -331,22 +350,6 @@ class _MainPageState extends State<MainPage> {
                   ),
                 ))),
       ),
-    );
-  }
-
-  void _pushEditTodo(BuildContext context, Todo todo) {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-          builder: (context) => EditTodo(
-                true,
-                (Todo edited) => {
-                  setState(() {}),
-                  print('added Todo (Callback in parent class)'),
-                  _pushDetailPage(edited)
-                },
-                todo.todoList,
-                todo: todo,
-              )),
     );
   }
 
